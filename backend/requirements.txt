@@ -1,0 +1,6 @@
+mysqlclient
+sqlalchemy
+flask
+Flask-Script
+Flask-Migrate
+simplejson
