@@ -25,8 +25,15 @@
 	<form>
 	<input type="text" name="field1" placeholder="Name" /> 
 	<input type="text" name="field2" placeholder="Address" />
-	<input type="text" name="field3" placeholder="City" />
-	<input type="text" name="field4" placeholder="State" />
+	<select name="country" class="countries" id="countryId" placeholder="Select Country">
+	<option value="">Select Country</option>
+	</select>
+	<select name="state" class="states" id="stateId">
+	<option value="">Select State</option>
+	</select>
+	<select name="city" class="cities" id="cityId">
+	<option value="">Select City</option>
+	</select>
 	<input type="text" name="field5" placeholder="Zip" />
 	<input type="submit" name="Get Fare Estimates" value="Get Fare Estimates" />
 	</form>
@@ -75,5 +82,7 @@
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoKeFrswJ6Btx3tQLF6eN-wE3Iej0WF3Q&callback=initMap">
     </script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="location.js"></script>
   </body>
 </html>
