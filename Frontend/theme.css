@@ -16,8 +16,7 @@
     padding: 16px;
 	opacity: #45;
     background: white;
-	float: right;
-	clear: right;
+	float: left;
 }
 #addressform h1{
     background: #43D1AF;
@@ -73,10 +72,12 @@
 
 #addressform input[type="submit"],
 #addressform input[type="button"]{
-    box-sizing: border-box;
+	float: left;
+    display:inline;
+	box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
-    width: 100%;
+    width: 50%;
     padding: 3%;
     background: #43D1AF;
     border-bottom: 2px solid #30C29E;
@@ -84,6 +85,7 @@
     border-right-style: none;
     border-left-style: none;    
     color: #fff;
+	font-size: 100%;
 }
 #addressform input[type="submit"]:hover,
 #addressform input[type="button"]:hover{
