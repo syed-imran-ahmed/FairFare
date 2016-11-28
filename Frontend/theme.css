@@ -71,6 +71,7 @@
 }
 
 #addressform input[type="submit"],
+#addressform input[type="reset"],
 #addressform input[type="button"]{
 	float: left;
     display:inline;

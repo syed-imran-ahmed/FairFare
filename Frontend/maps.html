@@ -7,23 +7,19 @@
     
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
-    <script src="location.js"></script>
-    <script src="ngAutocomplete.js"></script>
+ 
   
   
 </head>
 
 <body>
-<div id="wrapper" style="width:100%; text-align:center">
- <img src="images.jpg" alt="carview" style="width:250px;height:200px;border-radius:50%;">
-</div>
 <div id="addressform" ng-controller="TestCtrl">
 <h1>Compare the Best Fare</h1>
 <form id="form" role="form">
      <input type="text" id="name" placeholder="NAME"  />
      <input type="text" id="autocomplete" placeholder="PICKUP LOCATION"/>
      <input type="text" id="autocomplete" placeholder="DROPP OFF LOCATION"/>
-     <input type="submit" name="Save" value="Save" onclick="codeAddress()"/>
+     <input type="reset" name="Save" value="Save" onclick="codeAddress()"/>
     <input type="submit" name="Get Fare Estimates" value="Get Fare Estimates" />
 
 </form>
@@ -47,17 +43,21 @@
 function codeAddress() {
     var name = document.getElementById('name').value;
 	var address = document.getElementById('autocomplete').value;
-    geocoder.geocode( { 'address': address}, function(results, status) {
+	var url = "http://maps.google.com/maps/api/geocode/json?address="+ address +"&sensor=false";
+	window.location.href = url;
+	
+    /*geocoder.geocode( { 'address': address}, function(results, status) {
       if (status == 'OK') {
         map.setCenter(results[0].geometry.location);
         var marker = new google.maps.Marker({
             map: map,
             position: results[0].geometry.location
+	
         });
       } else {
         alert('Geocode was not successful for the following reason: ' + status);
       }
-    });
+    });*/
   }
   </script>
   <script async defer
