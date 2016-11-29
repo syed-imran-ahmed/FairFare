@@ -27,38 +27,7 @@
 <div id="map"></div>
 
 <script>
- function initialize() {
-    autocomplete = new google.maps.places.Autocomplete(
-            /** @type {!HTMLInputElement} */(document.getElementById('autocomplete')),
-            {types: ['geocode']});
-			
-    geocoder = new google.maps.Geocoder();
-    var latlng = new google.maps.LatLng(-34.397, 150.644);
-    var mapOptions = {
-      zoom: 8,
-      center: latlng
-    }
-    map = new google.maps.Map(document.getElementById('map'), mapOptions);
-  }
-function codeAddress() {
-    var name = document.getElementById('name').value;
-	var address = document.getElementById('autocomplete').value;
-	var url = "http://maps.google.com/maps/api/geocode/json?address="+ address +"&sensor=false";
-	window.location.href = url;
-	
-    /*geocoder.geocode( { 'address': address}, function(results, status) {
-      if (status == 'OK') {
-        map.setCenter(results[0].geometry.location);
-        var marker = new google.maps.Marker({
-            map: map,
-            position: results[0].geometry.location
-	
-        });
-      } else {
-        alert('Geocode was not successful for the following reason: ' + status);
-      }
-    });*/
-  }
+
   </script>
   <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoKeFrswJ6Btx3tQLF6eN-wE3Iej0WF3Q&libraries=places&callback=initialize">
