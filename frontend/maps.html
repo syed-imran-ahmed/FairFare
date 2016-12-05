@@ -9,10 +9,16 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
  
   
-  
 </head>
 
 <body>
+
+<br>
+<h1>Welcome to Fair Fare!</h1>
+<br>
+<br>
+
+   	
 <div id="addressform" ng-controller="TestCtrl">
 <h1>Compare the Best Fare</h1>
 <form id="form" role="form">
@@ -24,7 +30,8 @@
 
 </form>
 </div>
-<div id="map"></div>
+
+
 
 <script>
  function initialize() {
@@ -43,27 +50,35 @@
 function codeAddress() {
     var name = document.getElementById('name').value;
 	var address = document.getElementById('autocomplete').value;
-	var url = "http://maps.google.com/maps/api/geocode/json?address="+ address +"&sensor=false";
-	window.location.href = url;
-	
-    /*geocoder.geocode( { 'address': address}, function(results, status) {
+
+	geocoder.geocode( { 'address': address}, function(results, status) {
       if (status == 'OK') {
-        map.setCenter(results[0].geometry.location);
-        var marker = new google.maps.Marker({
-            map: map,
-            position: results[0].geometry.location
-	
-        });
+	  var obj = new Object();
+   obj.name = name;
+   obj.address  = results[0].address_components[0].long_name +" "+ results[0].address_components[1].long_name;
+   obj.city = results[0].address_components[3].short_name;;
+   obj.state = results[0].address_components[5].short_name;
+   obj.zip = results[0].address_components[7].long_name;
+   var jsonString= JSON.stringify(obj);
+xhr = new XMLHttpRequest();
+var url = "http://127.0.0.1:7000/locations";
+xhr.open("POST", url);
+xhr.setRequestHeader("Content-type", "application/json");
+xhr.send(jsonString); 
+       
+        
       } else {
         alert('Geocode was not successful for the following reason: ' + status);
       }
-    });*/
+    });
   }
   </script>
+
   <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoKeFrswJ6Btx3tQLF6eN-wE3Iej0WF3Q&libraries=places&callback=initialize">
     </script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	
 </body>
 </html>
 

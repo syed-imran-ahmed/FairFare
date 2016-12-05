@@ -1,25 +1,17 @@
-#map { 
-  height: 100%; 
-  width: 100%; 
-  position:absolute; 
-  top: 0; 
-  left: 0; 
-  z-index: 0; /* Set z-index to 0 as it will be on a layer below the contact form */
-}
+
 
 #addressform{
     font: 95% Arial, Helvetica, sans-serif;
-	position: relative; 
-    z-index: 1; /* The z-index should be higher than Google Maps */
+	position: relative;
     max-width: 400px;
     margin: 10px auto;
     padding: 16px;
 	opacity: #45;
     background: white;
-	float: left;
+	float: center;
 }
 #addressform h1{
-    background: #43D1AF;
+    background: black;
     padding: 20px 0;
     font-size: 140%;
     font-weight: 300;
@@ -80,7 +72,7 @@
     -moz-box-sizing: border-box;
     width: 50%;
     padding: 3%;
-    background: #43D1AF;
+    background: black;
     border-bottom: 2px solid #30C29E;
     border-top-style: none;
     border-right-style: none;
@@ -92,4 +84,37 @@
 #addressform input[type="button"]:hover{
     background: #2EBC99;
 }
+
+body  {
+    background-image: url(images.jpg);
+    background-size: 100%;
+	font-family: 'Merriweather', 'Helvetica Neue', Arial, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+
+
+ h1 {
+    font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-style: italic;
+  font-size: 40px;
+  line-height: 22px;
+  margin-bottom: 25px;
+  text-align:center;
+
+}
+
+#map { 
+  height: 400pxpx; 
+  width: 100px; 
+  position:absolute; 
+  top: 0; 
+  left: 0; 
+}
+
 
