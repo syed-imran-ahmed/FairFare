@@ -108,13 +108,12 @@ body {
   text-align:center;
 
 }
-
+    
 #map { 
-  height: 400pxpx; 
-  width: 100px; 
-  position:absolute; 
-  top: 0; 
-  left: 0; 
+  height: 300px; 
+  width: 300px; 
+  position:relative;
+  margin-left: 485px;  	
 }
 
 
