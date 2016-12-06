@@ -4,3 +4,4 @@ flask
 Flask-Script
 Flask-Migrate
 simplejson
+lyft_rides

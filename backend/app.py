@@ -41,7 +41,7 @@ def create_address():
         params = {
                 'address' : address+city+state,
                 'sensor' : 'false',
-        }  
+        }
 
         url = 'http://maps.google.com/maps/api/geocode/json?' + urllib.urlencode(params)
         response = urllib2.urlopen(url)
