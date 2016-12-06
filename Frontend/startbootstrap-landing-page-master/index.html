@@ -45,11 +45,14 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand topnav" href="#">Start Bootstrap</a>
+                <a class="navbar-brand topnav" href="#">FairFare</a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#Home">Home</a>
+                    </li>
                     <li>
                         <a href="#about">About</a>
                     </li>
@@ -66,9 +69,8 @@
         <!-- /.container -->
     </nav>
 
-
-    <!-- Header -->
-    <a name="about"></a>
+ <!-- Header -->
+    <a name="home"></a>
     <div class="intro-header">
         <div class="container">
 
@@ -90,13 +92,13 @@
                                         console.log('Email: ' + profile.getEmail());
                                 }</script>
                             <li>
-                                <a href="https://twitter.com/SBootstrap" class="btn btn-default btn-lg"><i class="fa fa-twitter fa-fw"></i> <span class="network-name">Twitter</span></a>
+                                <a href="https://twitter.com" class="btn btn-default btn-lg"><i class="fa fa-twitter fa-fw"></i> <span class="network-name">Twitter</span></a>
                             </li>
                             <li>
-                                <a href="https://github.com/IronSummitMedia/startbootstrap" class="btn btn-default btn-lg"><i class="fa fa-github fa-fw"></i> <span class="network-name">Github</span></a>
+                                <a href="https://github.com/syed-imran-ahmed/FairFare" class="btn btn-default btn-lg"><i class="fa fa-github fa-fw"></i> <span class="network-name">Github</span></a>
                             </li>
                             <li>
-                                <a href="#" class="btn btn-default btn-lg"><i class="fa fa-linkedin fa-fw"></i> <span class="network-name">Linkedin</span></a>
+                                <a href="https://linkedin.com" class="btn btn-default btn-lg"><i class="fa fa-linkedin fa-fw"></i> <span class="network-name">Linkedin</span></a>
                             </li>
                         </ul>
                     </div>
@@ -111,7 +113,9 @@
 
     <!-- Page Content -->
 
-	<a  name="services"></a>
+   
+
+	<a  name="about"></a>
     <div class="content-section-a">
 
         <div class="container">
@@ -119,11 +123,11 @@
                 <div class="col-lg-5 col-sm-6">
                     <hr class="section-heading-spacer">
                     <div class="clearfix"></div>
-                    <h2 class="section-heading">Death to the Stock Photo:<br>Special Thanks</h2>
-                    <p class="lead">A special thanks to <a target="_blank" href="http://join.deathtothestockphoto.com/">Death to the Stock Photo</a> for providing the photographs that you see in this template. Visit their website to become a member.</p>
+                    <h2 class="section-heading">About Us<br> </h2>
+                    <p class="lead"><a target="_blank" href="https://github.com/syed-imran-ahmed/FairFare">FairFare</a> , An attempt to provide a comparison about the fare difference between Uber and Lyft. We also help you to plan your trip in the cheapest way possible.</p>
                 </div>
                 <div class="col-lg-5 col-lg-offset-2 col-sm-6">
-                    <img class="img-responsive" src="img/ipad.png" alt="">
+                    <img class="img-responsive" src="img/ubervslyft.png" alt="">
                 </div>
             </div>
 
@@ -132,7 +136,7 @@
 
     </div>
     <!-- /.content-section-a -->
-
+    <a  name="services"></a>
     <div class="content-section-b">
 
         <div class="container">
@@ -141,11 +145,22 @@
                 <div class="col-lg-5 col-lg-offset-1 col-sm-push-6  col-sm-6">
                     <hr class="section-heading-spacer">
                     <div class="clearfix"></div>
-                    <h2 class="section-heading">3D Device Mockups<br>by PSDCovers</h2>
-                    <p class="lead">Turn your 2D designs into high quality, 3D product shots in seconds using free Photoshop actions by <a target="_blank" href="http://www.psdcovers.com/">PSDCovers</a>! Visit their website to download some of their awesome, free photoshop actions!</p>
+                    <h2 class="section-heading">Login<br>for Fairfare</h2>
+                    <p class="lead">Login with your google credentials to quickly find out your price estimate <a target="_blank" href=""></a>! Plan your trip with us and enjoy the best fare!!</p>
                 </div>
-                <div class="col-lg-5 col-sm-pull-6  col-sm-6">
-                    <img class="img-responsive" src="img/dog.png" alt="">
+                <div class="col-lg-5 col-sm-pull-6 col-sm-7">
+                     
+      
+                                <div class="g-signin2" data-onsuccess="onSignIn" style="width:100px; margin:0 auto;"></div>
+                                <script>
+                                        function onSignIn(googleUser) {
+                                        var profile = googleUser.getBasicProfile();
+                                        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+                                        console.log('Name: ' + profile.getName());
+                                        console.log('Image URL: ' + profile.getImageUrl());
+                                        console.log('Email: ' + profile.getEmail());
+                                }</script>
+                            
                 </div>
             </div>
 
