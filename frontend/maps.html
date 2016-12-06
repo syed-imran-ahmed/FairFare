@@ -26,7 +26,7 @@
      <input type="text" id="autocomplete1" placeholder="PICKUP LOCATION"/>
      <input type="text" id="autocomplete" placeholder="DROPP OFF LOCATION"/>
      <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
-    <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" />
+    <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" onclick="fareestimate()"/>
 
 </form>
 </div>
@@ -81,6 +81,44 @@ xhr.send(jsonString);
       }
     });
   }
+function fareestimate()
+    {
+        var json = {
+            "id": 200000,
+            "start": "/locations/12345",
+            "best_route_by_costs" : [ 
+                "/locations/1002",
+                "/locations/1000",
+                "/locations/1001",
+            ],
+            "providers" : [
+                {
+                    "name" : "Uber",
+                    "total_costs_by_cheapest_car_type" : 125,
+                    "currency_code": "USD",
+                    "total_duration" : 640,
+                    "duration_unit": "minute",
+                    "total_distance" : 25.05,
+                    "distance_unit": "mile"
+                },
+                {
+                    "name" : "Lyft",
+                    "total_costs_by_cheapest_car_type" : 110,
+                    "currency_code": "USD",
+                    "total_duration" : 620,
+                    "duration_unit": "minute",
+                    "total_distance" : 25.05,
+                    "distance_unit": "mile"
+                }
+            ],
+            "end": "/locations/12345",
+        };
+       
+        //var getres = JSON.parse(json);
+        document.write(JSON.stringify("Hello your price estimate for "+json.providers[0].name + " would be " +json.providers[0].total_costs_by_cheapest_car_type));
+        document.write("<br>");
+        document.write(JSON.stringify("Hello your price estimate for "+json.providers[1].name + " would be " +json.providers[1].total_costs_by_cheapest_car_type));
+    }
   </script>
 
   <script async defer
