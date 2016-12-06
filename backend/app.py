@@ -22,35 +22,21 @@ from model import app as application
 from sqlalchemy.exc import IntegrityError,SQLAlchemyError
 import os
 
+END_LATITUDE=0
+END_LONGITUDE=0
+USER_EMAIL='none'
+
+
+UBER_CLIENT_ID = 'YO5_U3M_6NJFHjCrTYjq8Cv-HRHeK0St'
+UBER_SERVER_TOKEN = 'BA5f0EmvAeZsZCwayyrS2LpjEJreWdp8kHifJktD'
+
+with open('config.json') as f:
+    config = json.load(f)
+
 app = Flask(__name__)
+app.secret_key = 'iwonttellyou'
 app.requests_session = requests.Session()
-app.secret_key = os.urandom(24)
-
-sslify = SSLify(app)
-
-GOOGLE_CLIENT_ID = '786919166452-v1h1kp81u4h1bsrhf1fp9eibt8ree1of.apps.googleusercontent.com'
-GOOGLE_CLIENT_SECRET = '_Cbad7k6yXdmSnSDF9NHPt1f'
-REDIRECT_URI = '/gCallback'
-
-login_manager = LoginManager(app)
-login_manager.login_view = "login"
-login_manager.session_protection = "strong"
-
-oauth = OAuth()
  
-google = oauth.remote_app('google',
-                          base_url='https://www.google.com/accounts/',
-                          authorize_url='https://accounts.google.com/o/oauth2/auth',
-                          request_token_url=None,
-                          request_token_params={'scope': 'https://www.googleapis.com/auth/userinfo.email',
-                                                'response_type': 'code'},
-                          access_token_url='https://accounts.google.com/o/oauth2/token',
-                          access_token_method='POST',
-                          access_token_params={'grant_type': 'authorization_code'},
-                          consumer_key=GOOGLE_CLIENT_ID,
-                          consumer_secret=GOOGLE_CLIENT_SECRET)
-
-
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
                 automatic_options=True):
@@ -92,56 +78,64 @@ def crossdomain(origin=None, methods=None, headers=None,
         return update_wrapper(wrapped_function, f)
     return decorator
  
+#GOOGLE AUTHENTICATION CALLS###########################################################
+redirect_uri = 'http://localhost:7000/gCallback'
+client_id = '786919166452-v1h1kp81u4h1bsrhf1fp9eibt8ree1of.apps.googleusercontent.com'  # get from https://code.google.com/apis/console
+client_secret = '_Cbad7k6yXdmSnSDF9NHPt1f'
+
+auth_uri = 'https://accounts.google.com/o/oauth2/auth'
+token_uri = 'https://accounts.google.com/o/oauth2/token'
+scope = ('https://www.googleapis.com/auth/userinfo.profile',
+         'https://www.googleapis.com/auth/userinfo.email')
+profile_uri = 'https://www.googleapis.com/oauth2/v1/userinfo'
+
+
 @app.route('/')
-@login_required
 def index():
-    access_token = session.get('access_token')
-    if access_token is None:
-        return redirect(url_for('login'))
- 
-    access_token = access_token[0]
-    from urllib2 import Request, urlopen, URLError
- 
-    headers = {'Authorization': 'OAuth '+access_token}
-    req = Request('https://www.googleapis.com/oauth2/v1/userinfo',
-                  None, headers)
-    try:
-        res = urlopen(req)
-    except URLError, e:
-        if e.code == 401:
-            # Unauthorized - bad token
-            session.pop('access_token', None)
-            return redirect(url_for('login'))
-        return res.read()
- 
-    return res.read()
- 
- 
-@app.route('/login')
-def login():
-    callback=url_for('authorized', _external=True)
-    return google.authorize(callback=callback)
- 
- 
- 
-@app.route(REDIRECT_URI)
-@google.authorized_handler
-def authorized(resp):
-    access_token = resp['access_token']
-    session['access_token'] = access_token, ''
-    return redirect(url_for('index'))
- 
- 
-@google.tokengetter
-def get_access_token():
-    return session.get('access_token')
+    if 'email' not in session:
+        return 'Please <a href="/login">login</a>'
+    else:
+        return ('Hello <b>{}</b>.'
+                '<a href="/logout">logout</a>').format(session['email'])
 
 
 @app.route('/logout')
-@login_required
 def logout():
-    logout_user()
+    session.pop('email', '')
     return redirect(url_for('index'))
+
+
+@app.route('/login')
+def login():
+    # Step 1
+    params = dict(response_type='code',
+                  scope=' '.join(scope),
+                  client_id=client_id,
+                  approval_prompt='force',  # or 'auto'
+                  redirect_uri=redirect_uri)
+    url = auth_uri + '?' + urllib.urlencode(params)
+    return redirect(url)
+
+
+@app.route('/gCallback')
+def callback():
+    if 'code' in request.args:
+        # Step 2
+        code = request.args.get('code')
+        data = dict(code=code,
+                    client_id=client_id,
+                    client_secret=client_secret,
+                    redirect_uri=redirect_uri,
+                    grant_type='authorization_code')
+        r = requests.post(token_uri, data=data)
+        # Step 3
+        access_token = r.json()['access_token']
+        r = requests.get(profile_uri, params={'access_token': access_token})
+        session['email'] = r.json()['email']
+        USER_EMAIL = r.json()['email']
+        return redirect(url_for('index'))
+    else:
+        return 'ERROR'
 
 
 #Location API's
@@ -154,89 +148,356 @@ def show_addresses():
 @app.route('/locations', methods=['POST'])
 @crossdomain(origin='*')
 def create_address():
-    try:
-        print request
-        name = request.json['name']
-        address = request.json['address']
-        city = request.json['city']
-        state = request.json['state']
-        zip = request.json['zip']
-        params = {
-                'address' : address+city+state,
-                'sensor' : 'false',
-        }  
+        try:
+            print request
+            name = request.json['name']
+            address = request.json['address']
+            city = request.json['city']
+            state = request.json['state']
+            zip = request.json['zip']
+            params = {
+                    'address' : address+city+state,
+                    'sensor' : 'false',
+            }  
 
-        url = 'http://maps.google.com/maps/api/geocode/json?' + urllib.urlencode(params)
-        response = urllib2.urlopen(url)
-        result = json.load(response)
-        
-        place = result['results'][0]['geometry']['location']
+            url = 'http://maps.google.com/maps/api/geocode/json?' + urllib.urlencode(params)
+            response = urllib2.urlopen(url)
+            result = json.load(response)
+            
+            place = result['results'][0]['geometry']['location']
 
-        database = CreateDB(hostname='127.0.0.1')
-        db.create_all()
-        user = User(name,address,city,state,zip,place['lat'],place['lng'])
-        db.session.add(user)
-        db.session.commit()
+            database = CreateDB(hostname='127.0.0.1')
+            db.create_all()
+            user = User(name,address,city,state,zip,place['lat'],place['lng'],USER_EMAIL)
+            db.session.add(user)
+            db.session.commit()
 
-        response = jsonify({'id':user.id,'name':request.json['name'], 'address':request.json['address'],'city':request.json['city'],'state':request.json['state'],'zip':request.json['zip'],
-        'coordinates':place})
-        response.status_code = 201
-        return response
-    except IntegrityError as e:
-                db.session.rollback()
-                resp = jsonify({"IntegrityError": str(e)})
-                resp.status_code = 403
-                return resp
-    except SQLAlchemyError as e:
-                db.session.rollback()
-                resp = jsonify({"error": str(e)})
-                resp.status_code = 403
-                return resp
+            response = jsonify({'id':user.id,'name':request.json['name'], 'address':request.json['address'],'city':request.json['city'],'state':request.json['state'],'zip':request.json['zip'],
+            'coordinates':place,'email':USER_EMAIL})
+            response.status_code = 201
+            return response
+        except IntegrityError as e:
+                    db.session.rollback()
+                    resp = jsonify({"IntegrityError": str(e)})
+                    resp.status_code = 403
+                    return resp
+        except SQLAlchemyError as e:
+                    db.session.rollback()
+                    resp = jsonify({"error": str(e)})
+                    resp.status_code = 403
+                    return resp
 
 @app.route('/locations/<address_id>')
 @crossdomain(origin='*')
-@login_required
 def show_address(address_id):
-    try:
-        user = User.query.filter_by(id=address_id).first_or_404()
-        return jsonify({'id':user.id, 'name':user.name, 'address':user.address,'city':user.city,'state':user.state,'zip':user.zip,'coordinates':{'lat':user.lat,'lng':user.lng}})
-    except IntegrityError:
-        resp = jsonify({"IntegrityError": str(e)})
-        resp.status_code = 404
-        return resp
+    if 'email' not in session:
+        return 'Please <a href="/login">login</a>'
+    else:
+        try:
+            user = User.query.filter_by(id=address_id).first_or_404()
+            return jsonify({'id':user.id, 'name':user.name, 'address':user.address,'city':user.city,'state':user.state,'zip':user.zip,'email':user.email,'coordinates':{'lat':user.lat,'lng':user.lng}})
+        except IntegrityError:
+            resp = jsonify({"IntegrityError": str(e)})
+            resp.status_code = 404
+            return resp
 
 @app.route('/locations/<int:address_id>', methods=['PUT'])
 @crossdomain(origin='*')
 def edit_address(address_id):
-	try:
-		user = User.query.get(address_id)
-		data = json.loads(request.data)
-		user.name = data['name']
-		db.session.commit()
-		resp = jsonify({"result":True})
-		resp.status_code = 202
-		return resp
+    if 'email' not in session:
+        return 'Please <a href="/login">login</a>'
+    else:
+        try:
+            user = User.query.get(address_id)
+            data = json.loads(request.data)
+            user.name = data['name']
+            db.session.commit()
+            resp = jsonify({"result":True})
+            resp.status_code = 202
+            return resp
 
-	except IntegrityError as e:
-                db.session.rollback()
-                resp = jsonify({"IntegrityError": str(e)})
-                resp.status_code = 403
-                return resp
+        except IntegrityError as e:
+                    db.session.rollback()
+                    resp = jsonify({"IntegrityError": str(e)})
+                    resp.status_code = 403
+                    return resp
 
 @app.route('/locations/<int:address_id>', methods=['DELETE'])
 @crossdomain(origin='*')
 def delete_address(address_id):
-    try:
-        db.session.delete(User.query.get(address_id))
-        db.session.commit()
-        resp = jsonify({"result":True})
-        resp.status_code = 204
-        return resp
+    if 'email' not in session:
+        return 'Please <a href="/login">login</a>'
+    else:
+        try:
+            db.session.delete(User.query.get(address_id))
+            db.session.commit()
+            resp = jsonify({"result":True})
+            resp.status_code = 204
+            return resp
 
-    except IntegrityError as e:
-        resp = jsonify({"IntegrityError": str(e)})
-        resp.status_code = 404
-        return resp
+        except IntegrityError as e:
+            resp = jsonify({"IntegrityError": str(e)})
+            resp.status_code = 404
+            return resp
+
+
+
+####################################################################################################################################
+##UBER APIS##
+
+
+def generate_ride_headers(token):
+    """Generate the header object that is used to make api requests."""
+    return {
+        'Authorization': 'Token %s' % token,
+        'Content-Type': 'application/json',
+    }
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    """Check the status of this application."""
+    return ';-)'
+
+
+@app.route('/', methods=['GET'])
+def signup():
+    """The first step in the three-legged OAuth handshake.
+
+    You should navigate here first. It will redirect to login.uber.com.
+    
+    params = {
+        'response_type': 'code',
+        'redirect_uri': get_redirect_uri(request),
+        'scopes': ','.join(config.get('scopes')),
+    }
+    url = generate_oauth_service().get_authorize_url(**params)
+    return redirect(url)"""
+    return "The app is working"
+
+
+@app.route('/submit', methods=['GET'])
+def submit():
+    """The other two steps in the three-legged Oauth handshake.
+
+    Your redirect uri will redirect you here, where you will exchange
+    a code that can be used to obtain an access token for the logged-in use.
+    """
+    params = {
+        'redirect_uri': get_redirect_uri(request),
+        'code': request.args.get('code'),
+        'grant_type': 'authorization_code'
+    }
+    response = app.requests_session.post(
+        config.get('access_token_url'),
+        auth=(
+            os.environ.get('UBER_CLIENT_ID'),
+            os.environ.get('UBER_CLIENT_SECRET')
+        ),
+        data=params,
+    )
+    session['access_token'] = response.json().get('access_token')
+
+    return render_template(
+        'success.html',
+        token=response.json().get('access_token')
+    )
+
+
+@app.route('/demo', methods=['GET'])
+def demo():
+    """Demo.html is a template that calls the other routes in this example."""
+    return render_template('demo.html', token=session.get('access_token'))
+
+
+@app.route('/products', methods=['GET'])
+def products():
+    """Example call to the products endpoint.
+
+    Returns all the products currently available in San Francisco.
+    """
+    url = config.get('base_uber_url') + 'products'
+    params = {
+        'latitude': config.get('start_latitude'),
+        'longitude': config.get('start_longitude'),
+    }
+
+    response = app.requests_session.get(
+        url,
+        headers=generate_ride_headers(session.get('access_token')),
+        params=params,
+    )
+
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='products',
+        data=response.text,
+    )
+
+
+@app.route('/time', methods=['GET'])
+def time():
+    """Example call to the time estimates endpoint.
+
+    Returns the time estimates from the given lat/lng given below.
+    """
+    url = config.get('base_uber_url') + 'estimates/time'
+    params = {
+        'start_latitude': config.get('start_latitude'),
+        'start_longitude': config.get('start_longitude'),
+    }
+
+    response = app.requests_session.get(
+        url,
+        headers=generate_ride_headers(UBER_SERVER_TOKEN),
+        params=params,
+    )
+
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='time',
+        data=json.dumps(response.text)
+    )
+
+
+@app.route('/price', methods=['GET'])
+def price():
+    """Example call to the price estimates endpoint."""
+
+    """Returns the time estimates from the given lat/lng given below.
+    """
+    url = config.get('base_uber_url') + 'estimates/price'
+    params = {
+        'start_latitude': config.get('start_latitude'),
+        'start_longitude': config.get('start_longitude'),
+        'end_latitude': END_LATITUDE,
+        'end_longitude': END_LONGITUDE,
+    }
+
+    response = requests.get(
+        url,
+        headers=generate_ride_headers(UBER_SERVER_TOKEN),
+        params=params,
+    )
+
+    data = json.loads(response.text)
+    #string = json.dumps(response.text).read().decode('utf-8')
+    #json_obj = json.loads(string)
+    price = data['prices'][1]['estimate']
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='price',
+        data=price,
+    )
+
+
+@app.route('/trips', methods=['POST'])
+def trip():
+    name = request.json['name']
+    address = request.json['address']
+    city = request.json['city']
+    state = request.json['state']
+    zip = request.json['zip']
+    params = {
+                'address' : address+city+state,
+                'sensor' : 'false',
+            }  
+
+    url = 'http://maps.google.com/maps/api/geocode/json?' + urllib.urlencode(params)
+    response = urllib2.urlopen(url)
+    result = json.load(response)
+    place = result['results'][0]['geometry']['location']
+    END_LATITUDE = place['lat']
+    END_LONGITUDE = place['lng']
+
+
+    url = config.get('base_uber_url') + 'estimates/price'
+    params = {
+        'start_latitude': config.get('start_latitude'),
+        'start_longitude': config.get('start_longitude'),
+        'end_latitude': END_LATITUDE,
+        'end_longitude': END_LONGITUDE,
+    }
+
+    response = requests.get(
+        url,
+        headers=generate_ride_headers(UBER_SERVER_TOKEN),
+        params=params,
+    )
+
+    data = json.loads(response.text)
+    #string = json.dumps(response.text).read().decode('utf-8')
+    #json_obj = json.loads(string)
+    price = data['prices'][1]['estimate']
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='price',
+        data=price,
+    )
+
+
+
+
+@app.route('/history', methods=['GET'])
+def history():
+    """Return the last 5 trips made by the logged in user."""
+    url = config.get('base_uber_url_v1_1') + 'history'
+    params = {
+        'offset': 0,
+        'limit': 5,
+    }
+
+    response = app.requests_session.get(
+        url,
+        headers=generate_ride_headers(session.get('access_token')),
+        params=params,
+    )
+
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='history',
+        data=response.text,
+    )
+
+
+@app.route('/me', methods=['GET'])
+def me():
+    """Return user information including name, picture and email."""
+    url = config.get('base_uber_url') + 'me'
+    response = app.requests_session.get(
+        url,
+        headers=generate_ride_headers(session.get('access_token')),
+    )
+
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='me',
+        data=response.text,
+    )
+
+
+def get_redirect_uri(request):
+    """Return OAuth redirect URI."""
+    parsed_url = urlparse(request.url)
+    if parsed_url.hostname == 'localhost':
+        return 'http://{hostname}:{port}/submit'.format(
+            hostname=parsed_url.hostname, port=parsed_url.port
+        )
+    return 'https://{hostname}/submit'.format(hostname=parsed_url.hostname)
+
+
 
 
 if __name__ == '__main__':

@@ -28,10 +28,11 @@ class User(db.Model):
 	city = db.Column(db.String(120), unique=False)
 	state = db.Column(db.String(120), unique=False)
 	zip = db.Column(db.Integer, unique=False)
+	email = db.Column(db.String(120), unique=False)
 	lat = db.Column(db.Float(precision='8,6'), unique=False)
 	lng	 = db.Column(db.Float(precision='9,6'), unique=False)
 
-	def __init__(self, name, address, city, state, zip, lat, lng ):
+	def __init__(self, name, address, city, state, zip, lat, lng, email ):
 		# initialize columns
 		self.name = name
 		self.address = address
@@ -39,7 +40,8 @@ class User(db.Model):
 		self.state = state
 		self.zip = zip
 		self.lat = lat
-		self.lng = lng 
+		self.lng = lng
+		self.email = email
 
 	def __repr__(self):
 		return '<User %r>' % self.name
