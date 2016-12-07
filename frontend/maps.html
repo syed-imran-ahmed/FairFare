@@ -23,10 +23,18 @@
 <h1>Compare the Best Fare</h1>
 <form id="form1" method="POST" role="form">
      <input type="text" id="name" placeholder="NAME"  />
-     <input type="text" id="autocomplete1" placeholder="PICKUP LOCATION"/>
-     <input type="text" id="autocomplete" placeholder="DROPP OFF LOCATION"/>
+	
+     <input type="text" id="autocomplete1" placeholder="LOCATION"/>
+	 <select id="autocomplete2" placeholder="SAVED PICKUP LOCATION" >
+        <option value="select">SAVED PICK UP LOCATION</option>
+    </select>
+
+     <select id="autocomplete3" placeholder="SAVED DROP OFF LOCATION" >
+        <option value="select">SAVED DROP OFF LOCATION</option>
+    </select>
+	 
      <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
-    <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" onclick="fareestimate()"/>
+    <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" />
 
 </form>
 </div>
@@ -36,6 +44,7 @@
 <div id="map"></div>
 
 <script>
+var id = 0;
  function initialize() {
     autocomplete = new google.maps.places.Autocomplete(
             /** @type {!HTMLInputElement} */(document.getElementById('autocomplete1')),
@@ -59,15 +68,51 @@ function codeAddress() {
 	  var obj = new Object();
    obj.name = name;
    obj.address  = results[0].address_components[0].long_name +" "+ results[0].address_components[1].long_name;
-   obj.city = results[0].address_components[3].short_name;;
+   obj.city = results[0].address_components[3].short_name;
    obj.state = results[0].address_components[5].short_name;
    obj.zip = results[0].address_components[7].long_name;
-   var jsonString= JSON.stringify(obj);
-xhr = new XMLHttpRequest();
-var url = "http://127.0.0.1:7000/locations";
-xhr.open('POST', url);
-xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-xhr.send(jsonString); 
+   
+ $.ajax({
+        	url : 'http://localhost:7000/locations',
+        	dataType : 'json',
+        	type : 'POST',
+          contentType: 'application/json;charset=utf-8',
+        	data : JSON.stringify(obj),
+        	success: function(responseData, textStatus, jqXHR) {
+                alert("data saved");
+			    id = responseData.id;
+				$.getJSON("http://localhost:7000/locations", function (data) {
+				var datavalue = data;
+            var serverResponse = datavalue;
+			
+    $.each(serverResponse, function (i, item) {
+        var div_data = "<option value=" + item.id + ">" + item.address + "</option>";
+        alert(div_data);
+        $(div_data).appendTo('#autocomplete2');
+		$(div_data).appendTo('#autocomplete3');
+
+    });
+});
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                alert("not saved");
+            }
+        }); 
+		/*$.ajax({
+        	url : 'http://localhost:7000/locations/'+id,
+        	dataType : 'json',
+        	type : 'GET',
+        	success: function(responseData) {
+			var result = responseData.address + responseData.city + responseData.state
+                $("#autocomplete2").html(result)}
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                alert("not saved");
+            }
+        }); */
+		
  map.setCenter(results[0].geometry.location);
         var marker = new google.maps.Marker({
             map: map,
@@ -81,44 +126,6 @@ xhr.send(jsonString);
       }
     });
   }
-function fareestimate()
-    {
-        var json = {
-            "id": 200000,
-            "start": "/locations/12345",
-            "best_route_by_costs" : [ 
-                "/locations/1002",
-                "/locations/1000",
-                "/locations/1001",
-            ],
-            "providers" : [
-                {
-                    "name" : "Uber",
-                    "total_costs_by_cheapest_car_type" : 125,
-                    "currency_code": "USD",
-                    "total_duration" : 640,
-                    "duration_unit": "minute",
-                    "total_distance" : 25.05,
-                    "distance_unit": "mile"
-                },
-                {
-                    "name" : "Lyft",
-                    "total_costs_by_cheapest_car_type" : 110,
-                    "currency_code": "USD",
-                    "total_duration" : 620,
-                    "duration_unit": "minute",
-                    "total_distance" : 25.05,
-                    "distance_unit": "mile"
-                }
-            ],
-            "end": "/locations/12345",
-        };
-       
-        //var getres = JSON.parse(json);
-        document.write(JSON.stringify("Hello your price estimate for "+json.providers[0].name + " would be " +json.providers[0].total_costs_by_cheapest_car_type));
-        document.write("<br>");
-        document.write(JSON.stringify("Hello your price estimate for "+json.providers[1].name + " would be " +json.providers[1].total_costs_by_cheapest_car_type));
-    }
   </script>
 
   <script async defer
