@@ -368,6 +368,112 @@ def trip():
     ) """
 
 
+@app.route('/products', methods=['GET'])
+def products():
+    """Example call to the products endpoint.
+
+    Returns all the products currently available in San Francisco.
+    """
+    url = config.get('base_uber_url') + 'products'
+    params = {
+        'latitude': config.get('start_latitude'),
+        'longitude': config.get('start_longitude'),
+    }
+
+    response = app.requests_session.get(
+        url,
+        headers=generate_ride_headers(session.get('access_token')),
+        params=params,
+    )
+
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='products',
+        data=response.text,
+    )
+
+
+@app.route('/time', methods=['GET'])
+def time():
+    """Example call to the time estimates endpoint.
+
+    Returns the time estimates from the given lat/lng given below.
+    """
+    url = config.get('base_uber_url') + 'estimates/time'
+    params = {
+        'start_latitude': config.get('start_latitude'),
+        'start_longitude': config.get('start_longitude'),
+    }
+
+    response = app.requests_session.get(
+        url,
+        headers=generate_ride_headers(UBER_SERVER_TOKEN),
+        params=params,
+    )
+
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='time',
+        data=json.dumps(response.text)
+    )
+
+
+@app.route('/price', methods=['GET'])
+def price():
+    """Example call to the price estimates endpoint.
+
+    Returns the time estimates from the given lat/lng given below.
+    """
+    url = config.get('base_uber_url') + 'estimates/price'
+    params = {
+        'start_latitude': config.get('start_latitude'),
+        'start_longitude': config.get('start_longitude'),
+        'end_latitude': config.get('end_latitude'),
+        'end_longitude': config.get('end_longitude'),
+    }
+
+    response = app.requests_session.get(
+        url,
+        headers=generate_ride_headers(session.get('access_token')),
+        params=params,
+    )
+
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='price',
+        data=response.text,
+    )
+
+
+@app.route('/history', methods=['GET'])
+def history():
+    """Return the last 5 trips made by the logged in user."""
+    url = config.get('base_uber_url_v1_1') + 'history'
+    params = {
+        'offset': 0,
+        'limit': 5,
+    }
+
+    response = app.requests_session.get(
+        url,
+        headers=generate_ride_headers(session.get('access_token')),
+        params=params,
+    )
+
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+    return render_template(
+        'results.html',
+        endpoint='history',
+        data=response.text,
+    )
+
 
 @app.route('/me', methods=['GET'])
 def me():

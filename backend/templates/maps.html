@@ -1,51 +1,72 @@
 <!DOCTYPE html>
-<html ng-app="Test">
+<html>
 <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" href="/static/js/bootstrap.min.css">
+	<link rel="stylesheet" href="/static/js/bootstrap.min.css">
     <link rel="stylesheet" type="text/css"href="/static/css/theme.css">
     
-    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
+    <!--script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script-->
+    <!--script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script-->
  
   
 </head>
 
 <body>
 
+
 <br>
 <h1>Welcome to Fair Fare!</h1>
 <br>
 <br>
 
+<nav id="navigation" ><a onclick="logout()">Logout</a>  </nav>
    	
-<div id="addressform" ng-controller="TestCtrl">
+<div id="addressform">
 <h1>Compare the Best Fare</h1>
 <form id="form1" method="POST" role="form">
      <input type="text" id="name" placeholder="NAME"  />
 	
      <input type="text" id="autocomplete1" placeholder="LOCATION"/>
-	 <select id="ddlScheme" onclick="GetAllScheme()" placeholder="SAVED PICKUP LOCATION" >
+	 <select id="ddlScheme" onclick="GetAllScheme()"  placeholder="SAVED PICKUP LOCATION" >
     </select>
+	
+	<!--select onchange="console.log('Hello')">
+	<option id="first">First
+	<option id="sec">Second
+	</select-->
 
-     <select id="ddlScheme" onclick="GetAllScheme()" placeholder="SAVED DROP OFF LOCATION" >
+     <select id="ddlScheme1" onclick="GetAllScheme1()"  placeholder="SAVED DROP OFF LOCATION" >
     </select>
 	 
      <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
-    <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" />
-
+    <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" onclick="getEstimates()"/>
 </form>
 </div>
 <br>
 <br>
+<div id ="trip1" style="display:none;background-color:#FFE4C4">
+</div>
 
-<div id="map"></div>
+
+<div id="map">
+</div>
 
 <script>
+var body = document.getElementsByTagName("body")[0];
+var navigation = document.getElementById("navigation");
+
+window.addEventListener("scroll", function(evt) {
+  if (body.scrollTop > navigation.getBoundingClientRect().bottom) {
+    // when the scroll's y is bigger than the nav's y set class to fixednav
+    navigation.className = "fixednav"
+  } else { // Overwise set the class to staticnav
+    navigation.className = "staticnav"
+  }
+});
 
 function GetAllScheme() {
     var select = $("#ddlScheme");
-    document.getElementById("ddlScheme").options.length = 0;
+   
 
     $.ajax({
 
@@ -58,11 +79,14 @@ function GetAllScheme() {
             var datavalue = data;
             var serverResponse = datavalue;
             contentType: "application/json";
+			if (select.has('option').length ==0){
+			
             $.each(serverResponse, function (i, item)
             {
-                select.append("<option value='" + item.id + "'>" + item.name + "</option>")
+                select.append("<option value='" + item.id + "'>" + item.name);
 
             });
+			}
 
         },
         error: function (xhr) {
@@ -71,9 +95,115 @@ function GetAllScheme() {
     });
 }
 
+function GetAllScheme1() {
+    var select = $("#ddlScheme1");
+    
 
+    $.ajax({
 
+        type: "GET",
+        url: "http://localhost:7000/locations",
+
+        dataType: "json",
+        success: function (data) {
+            debugger;
+            var datavalue = data;
+            var serverResponse = datavalue;
+            contentType: "application/json";
+			if (select.has('option').length ==0){
+            $.each(serverResponse, function (i, item)
+            {
+			
+                select.append("<option value='" + item.id + "'>" + item.name + "</option>")
+
+            });
+			}
+			
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
+}
+
+/*<p>Name:  </p>
+<p>Price: </p>
+<p>Duration: </p>
+*/
+function getEstimates()
+{
+   
+ var start = $('#ddlScheme').val();  
+ var end = $('#ddlScheme1').val();
+ 	  var obj1 = new Object();
+   obj1.start = start;
+   obj1.end = end;
+   $.ajax({
+        	url : 'http://localhost:7000/trips',
+        	dataType : 'json',
+        	type : 'POST',
+          contentType: 'application/json;charset=utf-8',
+        	data : JSON.stringify(obj1),
+        	success: function(responseData, textStatus, jqXHR) {
+			        $('#trip1').show();
+					$('#trip1').html("<p id='name'>"+"Name :"+responseData.name+ "</p>");
+					$('#trip1').append("<p id='cost'>"+"Cost :"+responseData.total_costs_by_cheapest_car_type+"</p>");
+					$('#trip1').append("<p id='duration'>"+"Duration :"+responseData.total_duration+"</p>");
+					$('#trip1').append("<p id='distance'>"+"Distance :"+responseData.total_distance+"</p>");
+					//$('#trip1').has('#name2').text(responseData.total_costs_by_cheapest_car_type);
+						
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                alert("data not sent");
+            }
+        }); 
+
+}
 var id = 0;
+  /*  function initMap() {
+  var pointA = new google.maps.LatLng(51.7519, -1.2578),
+    pointB = new google.maps.LatLng(50.8429, -0.1313),
+    myOptions = {
+      zoom: 7,
+      center: pointA
+    },
+    map = new google.maps.Map(document.getElementById('map-canvas'), myOptions),
+    // Instantiate a directions service.
+    directionsService = new google.maps.DirectionsService,
+    directionsDisplay = new google.maps.DirectionsRenderer({
+      map: map
+    }),
+    markerA = new google.maps.Marker({
+      position: pointA,
+      title: "point A",
+      label: "A",
+      map: map
+    }),
+    markerB = new google.maps.Marker({
+      position: pointB,
+      title: "point B",
+      label: "B",
+      map: map
+    });
+
+  // get route from A to B
+  calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, pointB);
+
+}
+function calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, pointB) {
+  directionsService.route({
+    origin: pointA,
+    destination: pointB,
+    travelMode: google.maps.TravelMode.DRIVING
+  }, function(response, status) {
+    if (status == google.maps.DirectionsStatus.OK) {
+      directionsDisplay.setDirections(response);
+    } else {
+      window.alert('Directions request failed due to ' + status);
+    }
+  });
+}*/
  function initialize() {
     autocomplete = new google.maps.places.Autocomplete(
             /** @type {!HTMLInputElement} */(document.getElementById('autocomplete1')),
@@ -109,26 +239,14 @@ function codeAddress() {
         	data : JSON.stringify(obj),
         	success: function(responseData, textStatus, jqXHR) {
                 alert("data saved");
-			    id = responseData.id;
+		
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(errorThrown);
                 alert("not saved");
             }
         }); 
-		/*$.ajax({
-        	url : 'http://localhost:7000/locations/'+id,
-        	dataType : 'json',
-        	type : 'GET',
-        	success: function(responseData) {
-			var result = responseData.address + responseData.city + responseData.state
-                $("#autocomplete2").html(result)}
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.log(errorThrown);
-                alert("not saved");
-            }
-        }); */
+	
 		
  map.setCenter(results[0].geometry.location);
         var marker = new google.maps.Marker({
@@ -143,6 +261,9 @@ function codeAddress() {
       }
     });
   }
+function logout() {
+    document.location.href = "https://www.google.com/accounts/Logout";
+}
   </script>
 
   <script async defer
