@@ -144,12 +144,8 @@ def callback():
 #Location API's
 @app.route('/locations', methods=['GET'])
 def show_addresses():
-    if 'email' not in session:
-        return redirect(url_for('index'))
-    else:
         all_addresses = User.query.with_entities(User.id, User.name)
         entries = [dict(id=address[0], name=address[1]) for address in all_addresses]
-        print(session['email'])
         return json.dumps(entries)
 	
 @app.route('/locations', methods=['POST'])
