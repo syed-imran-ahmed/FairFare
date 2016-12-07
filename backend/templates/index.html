@@ -81,16 +81,7 @@
                         <h3>Find out your estimate before you on board</h3>
                         <hr class="intro-divider">
                         <ul class="list-inline intro-social-buttons">
-                            <li>
-                                <div class="g-signin2" data-onsuccess="onSignIn"></div>
-                                <script>
-                                        function onSignIn(googleUser) {
-                                        var profile = googleUser.getBasicProfile();
-                                        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-                                        console.log('Name: ' + profile.getName());
-                                        console.log('Image URL: ' + profile.getImageUrl());
-                                        console.log('Email: ' + profile.getEmail());
-                                }</script>
+                            
                             <li>
                                 <a href="https://twitter.com" class="btn btn-default btn-lg"><i class="fa fa-twitter fa-fw"></i> <span class="network-name">Twitter</span></a>
                             </li>
@@ -151,15 +142,7 @@
                 <div class="col-lg-5 col-sm-pull-6 col-sm-7">
                      
       
-                                <div class="g-signin2" data-onsuccess="onSignIn" style="width:100px; margin:0 auto;"></div>
-                                <script>
-                                        function onSignIn(googleUser) {
-                                        var profile = googleUser.getBasicProfile();
-                                        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-                                        console.log('Name: ' + profile.getName());
-                                        console.log('Image URL: ' + profile.getImageUrl());
-                                        console.log('Email: ' + profile.getEmail());
-                                }</script>
+                                <a href="http://localhost:7000/login" class="btn btn-default btn-lg"><span class="network-name">Login</span></a>
                             
                 </div>
             </div>
