@@ -92,7 +92,7 @@ profile_uri = 'https://www.googleapis.com/oauth2/v1/userinfo'
 
 @app.route('/')
 def index():
-    if 'email' not in session:
+    if session.get('email') is None:
         return render_template(
         'index.html',
     )
@@ -144,9 +144,12 @@ def callback():
 #Location API's
 @app.route('/locations', methods=['GET'])
 def show_addresses():
-        all_addresses = User.query.with_entities(User.id, User.name)
+    if session.get('email') is not None:
+        all_addresses = User.query.with_entities(User.id, User.name).filter_by(email=session.get('email'))
         entries = [dict(id=address[0], name=address[1]) for address in all_addresses]
         return json.dumps(entries)
+    else: 
+        return redirect(url_for('index'))
 	
 @app.route('/locations', methods=['POST'])
 @crossdomain(origin='*')
@@ -171,12 +174,12 @@ def create_address():
 
             database = CreateDB(hostname='127.0.0.1')
             db.create_all()
-            user = User(name,address,city,state,zip,place['lat'],place['lng'],USER_EMAIL)
+            user = User(name,address,city,state,zip,place['lat'],place['lng'],session['email'])
             db.session.add(user)
             db.session.commit()
 
             response = jsonify({'id':user.id,'name':request.json['name'], 'address':request.json['address'],'city':request.json['city'],'state':request.json['state'],'zip':request.json['zip'],
-            'coordinates':place,'email':USER_EMAIL})
+            'coordinates':place,'email':session['email']})
             response.status_code = 201
             return response
         except IntegrityError as e:
