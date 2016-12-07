@@ -44,7 +44,7 @@ app.requests_session = requests.Session()
 lyftauth_flow = ClientCredentialGrant(
 client_id="YAoc10HPt3YZ", client_secret="1I3WOpilktUG3jRUrP_wKyDX0KPkYn1j", scopes='public')
 lyftsession = lyftauth_flow.get_session()
-lyftclient = LyftRidesClient(session)
+lyftclient = LyftRidesClient(lyftsession)
 
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
@@ -347,23 +347,26 @@ def trip():
     
     #minimum cost by lyft
     lyftcosts = lyftresponse.json.get('cost_estimates')
+    #print lyftcosts
     lyftbestprice = {}
-    for item in lyftcosts:
-        if item["ride_type"] is "lyft":
-            surge = item["primetime_percentage"]
-            surge = float("1." + surge[:-1])
-            
-            item["estimated_cost_cents_min"] = item["estimated_cost_cents_min"] * surge
-            item["estimated_cost_cents_max"] = item["estimated_cost_cents_max"] * surge
+    #for item in lyftcosts:
+       # if item["ride_type"] is "lyft":
+    item = lyftcosts[2]
+    surge = item["primetime_percentage"]
+    surge = float("1." + surge[:-1])
+    
+    item["estimated_cost_cents_min"] = item["estimated_cost_cents_min"] * surge
+    item["estimated_cost_cents_max"] = item["estimated_cost_cents_max"] * surge
 
-            lyftbestprice["name"] = item["display_name"]
-            lyftbestprice['total_costs_by_cheapest_car_type'] = str(item["estimated_cost_cents_min"]) + " - " + str(item["estimated_cost_cents_max"])
-            lyftbestprice['currency_code'] = item["currency"]
-            lyftbestprice['total_duration'] = item["estimated_duration_seconds"]
-            lyftbestprice['duration_unit'] = item["seconds"]
-            lyftbestprice['total_distance'] = item["estimated_distance_miles"]
-            lyftbestprice['distance_unit'] = item["miles"]
+    lyftbestprice["name"] = item["display_name"]
+    lyftbestprice['total_costs_by_cheapest_car_type'] = str(item["estimated_cost_cents_min"]) + " - " + str(item["estimated_cost_cents_max"])
+    lyftbestprice['currency_code'] = item["currency"]
+    lyftbestprice['total_duration'] = item["estimated_duration_seconds"]
+    lyftbestprice['duration_unit'] = "seconds"
+    lyftbestprice['total_distance'] = item["estimated_distance_miles"]
+    lyftbestprice['distance_unit'] = "miles"
 
+    print lyftbestprice
     
     # uber data fetched here
     url = config.get('base_uber_url') + 'estimates/price'
@@ -392,9 +395,9 @@ def trip():
     currency = data['prices'][1]['currency_code']
     time = data['prices'][1]['duration']
     distance = data['prices'][1]['distance']
-    uberres = jsonify({'name':"Uber",'total_costs_by_cheapest_car_type':price, 
+    uberres = {'name':"Uber",'total_costs_by_cheapest_car_type':price, 
     'currency_code':currency,'total_duration':time,'duration_unit':"seconds",
-    'total_distance':distance, 'distance_unit':"miles"})
+    'total_distance':distance, 'distance_unit':"miles"}
 
     # final response created here
     final_resp ={
@@ -402,7 +405,7 @@ def trip():
         "best_route_by_costs" : [ 
         ],
         "providers" : [
-            lyftresponse,
+            lyftbestprice,
             uberres
             ],
         "end":"/locations/" + str(id_end)
@@ -440,7 +443,7 @@ def trip():
     ],
     "end": "/locations/12345"
 }"""
-    return res
+    return jsonify(final_resp)
     """render_template(
         'results.html',
         endpoint='price',
