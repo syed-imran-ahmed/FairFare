@@ -16,29 +16,24 @@
 
 <br>
 <h1>Welcome to Fair Fare!</h1>
+    <nav id="navigation" ><a onclick="logout()">Logout</a>  </nav>
 <br>
 <br>
-
-<nav id="navigation" ><a onclick="logout()">Logout</a>  </nav>
-   	
+<br>
 <div id="addressform">
 <h1>Compare the Best Fare</h1>
 <form id="form1" method="POST" role="form">
-     <input type="text" id="name" placeholder="NAME"  />
+     <input type="text" id="name" name="Name" placeholder="NAME"  />
 	
-     <input type="text" id="autocomplete1" placeholder="LOCATION"/>
+     <input type="text" id="autocomplete1" name="LOCATION" placeholder="LOCATION"/>
 	 <select id="ddlScheme" onclick="GetAllScheme()"  placeholder="SAVED PICKUP LOCATION" >
     </select>
-	
-	<!--select onchange="console.log('Hello')">
-	<option id="first">First
-	<option id="sec">Second
-	</select-->
 
      <select id="ddlScheme1" onclick="GetAllScheme1()"  placeholder="SAVED DROP OFF LOCATION" >
     </select>
 	 
-     <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
+     <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()" />
+   
     <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" onclick="getEstimates()"/>
 </form>
 </div>
@@ -55,14 +50,6 @@
 var body = document.getElementsByTagName("body")[0];
 var navigation = document.getElementById("navigation");
 
-window.addEventListener("scroll", function(evt) {
-  if (body.scrollTop > navigation.getBoundingClientRect().bottom) {
-    // when the scroll's y is bigger than the nav's y set class to fixednav
-    navigation.className = "fixednav"
-  } else { // Overwise set the class to staticnav
-    navigation.className = "staticnav"
-  }
-});
 
 function GetAllScheme() {
     var select = $("#ddlScheme");
@@ -260,9 +247,11 @@ function codeAddress() {
         alert('Geocode was not successful for the following reason: ' + status);
       }
     });
+    document.getElementById("name").value = "";
+    document.getElementById("autocomplete1").value = "";
   }
 function logout() {
-    document.location.href = "https://www.google.com/accounts/Logout";
+    document.location.href = "http://localhost:7000/logout";
 }
   </script>
 
