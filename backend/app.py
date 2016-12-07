@@ -341,16 +341,25 @@ def trip():
     )
 
     data = json.loads(response.text)
+
     #string = json.dumps(response.text).read().decode('utf-8')
     #json_obj = json.loads(string)
+
     price = data['prices'][1]['estimate']
+    currency = data['prices'][1]['currency_code']
+    time = data['prices'][1]['duration']
+    distance = data['prices'][1]['distance']
+    res = jsonify({'name':"Uber",'total_costs_by_cheapest_car_type':price, 'currency_code':currency,'total_duration':time,'duration_unit':"seconds",'total_distance':distance,
+    'distance_unit':"miles"})
+
     if response.status_code != 200:
         return 'There was an error', response.status_code
-    return render_template(
+    return res
+    """render_template(
         'results.html',
         endpoint='price',
-        data=price,
-    )
+        data=res,
+    ) """
 
 
 
