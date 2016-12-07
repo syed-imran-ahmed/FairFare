@@ -93,10 +93,13 @@ profile_uri = 'https://www.googleapis.com/oauth2/v1/userinfo'
 @app.route('/')
 def index():
     if 'email' not in session:
-        return 'Please <a href="/login">login</a>'
+        return render_template(
+        'index.html',
+    )
     else:
-        return ('Hello <b>{}</b>.'
-                '<a href="/logout">logout</a>').format(session['email'])
+        return render_template(
+        'maps.html',
+    )
 
 
 @app.route('/logout')
@@ -141,9 +144,13 @@ def callback():
 #Location API's
 @app.route('/locations', methods=['GET'])
 def show_addresses():
-  all_addresses = User.query.with_entities(User.id, User.name)
-  entries = [dict(id=address[0], name=address[1]) for address in all_addresses]
-  return json.dumps(entries)
+    if 'email' not in session:
+        return redirect(url_for('index'))
+    else:
+        all_addresses = User.query.with_entities(User.id, User.name)
+        entries = [dict(id=address[0], name=address[1]) for address in all_addresses]
+        print(session['email'])
+        return json.dumps(entries)
 	
 @app.route('/locations', methods=['POST'])
 @crossdomain(origin='*')

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html ng-app="Test">
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="/static/js/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css"href="/static/css/theme.css">
+    
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
+ 
+  
+</head>
+
+<body>
+
+<br>
+<h1>Welcome to Fair Fare!</h1>
+<br>
+<br>
+
+   	
+<div id="addressform" ng-controller="TestCtrl">
+<h1>Compare the Best Fare</h1>
+<form id="form1" method="POST" role="form">
+     <input type="text" id="name" placeholder="NAME"  />
+	
+     <input type="text" id="autocomplete1" placeholder="LOCATION"/>
+	 <select id="ddlScheme" onclick="GetAllScheme()" placeholder="SAVED PICKUP LOCATION" >
+    </select>
+
+     <select id="ddlScheme" onclick="GetAllScheme()" placeholder="SAVED DROP OFF LOCATION" >
+    </select>
+	 
+     <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
+    <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" />
+
+</form>
+</div>
+<br>
+<br>
+
+<div id="map"></div>
+
+<script>
+
+function GetAllScheme() {
+    var select = $("#ddlScheme");
+    document.getElementById("ddlScheme").options.length = 0;
+
+    $.ajax({
+
+        type: "GET",
+        url: "http://localhost:7000/locations",
+
+        dataType: "json",
+        success: function (data) {
+            debugger;
+            var datavalue = data;
+            var serverResponse = datavalue;
+            contentType: "application/json";
+            $.each(serverResponse, function (i, item)
+            {
+                select.append("<option value='" + item.id + "'>" + item.name + "</option>")
+
+            });
+
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
+}
+
+
+
+var id = 0;
+ function initialize() {
+    autocomplete = new google.maps.places.Autocomplete(
+            /** @type {!HTMLInputElement} */(document.getElementById('autocomplete1')),
+            {types: ['geocode']});
+			
+    geocoder = new google.maps.Geocoder();
+    var latlng = new google.maps.LatLng(-34.397, 150.644);
+    var mapOptions = {
+      zoom: 8,
+      center: latlng
+    }
+    map = new google.maps.Map(document.getElementById('map'), mapOptions);
+	
+  }
+function codeAddress() {
+    var name = document.getElementById('name').value;
+	var address = document.getElementById('autocomplete1').value;
+
+	geocoder.geocode( { 'address': address}, function(results, status) {
+      if (status == 'OK') {
+	  var obj = new Object();
+   obj.name = name;
+   obj.address  = results[0].address_components[0].long_name +" "+ results[0].address_components[1].long_name;
+   obj.city = results[0].address_components[3].short_name;
+   obj.state = results[0].address_components[5].short_name;
+   obj.zip = results[0].address_components[7].long_name;
+   
+ $.ajax({
+        	url : 'http://localhost:7000/locations',
+        	dataType : 'json',
+        	type : 'POST',
+          contentType: 'application/json;charset=utf-8',
+        	data : JSON.stringify(obj),
+        	success: function(responseData, textStatus, jqXHR) {
+                alert("data saved");
+			    id = responseData.id;
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                alert("not saved");
+            }
+        }); 
+		/*$.ajax({
+        	url : 'http://localhost:7000/locations/'+id,
+        	dataType : 'json',
+        	type : 'GET',
+        	success: function(responseData) {
+			var result = responseData.address + responseData.city + responseData.state
+                $("#autocomplete2").html(result)}
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                alert("not saved");
+            }
+        }); */
+		
+ map.setCenter(results[0].geometry.location);
+        var marker = new google.maps.Marker({
+            map: map,
+            position: results[0].geometry.location
+	
+        });
+       
+        
+      } else {
+        alert('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+  }
+  </script>
+
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoKeFrswJ6Btx3tQLF6eN-wE3Iej0WF3Q&libraries=places&callback=initialize">
+    </script>
+	<script src="/static/js/jquery-2.1.1.min.js"></script>
+	
+</body>
+</html>
+

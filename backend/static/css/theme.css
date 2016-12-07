@@ -1,0 +1,119 @@
+
+
+#addressform{
+    font: 95% Arial, Helvetica, sans-serif;
+	position: relative;
+    max-width: 400px;
+    margin: 10px auto;
+    padding: 16px;
+	opacity: #45;
+    background: white;
+	float: center;
+}
+#addressform h1{
+    background: black;
+    padding: 20px 0;
+    font-size: 140%;
+    font-weight: 300;
+    text-align: center;
+    color: #fff;
+    margin: -16px -16px 16px -16px;
+}
+#addressform input[type="text"],
+#addressform input[type="date"],
+#addressform input[type="datetime"],
+#addressform input[type="email"],
+#addressform input[type="number"],
+#addressform input[type="search"],
+#addressform input[type="time"],
+#addressform input[type="url"],
+#addressform textarea,
+#addressform select 
+{
+    -webkit-transition: all 0#30s ease-in-out;
+    -moz-transition: all 0#30s ease-in-out;
+    -ms-transition: all 0#30s ease-in-out;
+    -o-transition: all 0#30s ease-in-out;
+    outline: none;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    width: 100%;
+    background: #fff;
+    margin-bottom: 4%;
+    border: 1px solid #ccc;
+    padding: 3%;
+    color: #555;
+    font: 95% Arial, Helvetica, sans-serif;
+}
+#addressform input[type="text"]:focus,
+#addressform input[type="date"]:focus,
+#addressform input[type="datetime"]:focus,
+#addressform input[type="email"]:focus,
+#addressform input[type="number"]:focus,
+#addressform input[type="search"]:focus,
+#addressform input[type="time"]:focus,
+#addressform input[type="url"]:focus,
+#addressform textarea:focus,
+#addressform select:focus
+{
+    box-shadow: 0 0 5px #43D1AF;
+    padding: 3%;
+    border: 1px solid #43D1AF;
+}
+
+#addressform input[type="submit"],
+#addressform input[type="reset"],
+#addressform input[type="button"]{
+	float: left;
+    display:inline;
+	box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    width: 50%;
+    padding: 3%;
+    background: black;
+    border-bottom: 2px solid #30C29E;
+    border-top-style: none;
+    border-right-style: none;
+    border-left-style: none;    
+    color: #fff;
+	font-size: 100%;
+}
+#addressform input[type="submit"]:hover,
+#addressform input[type="button"]:hover{
+    background: #2EBC99;
+}
+
+body  {
+    background-image: url(images.jpg);
+    background-size: 100%;
+	font-family: 'Merriweather', 'Helvetica Neue', Arial, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+
+
+ h1 {
+    font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-style: italic;
+  font-size: 40px;
+  line-height: 22px;
+  margin-bottom: 25px;
+  text-align:center;
+
+}
+    
+#map { 
+  height: 300px; 
+  width: 300px; 
+  position:relative;
+  margin-left: 485px;  	
+}
+
+
