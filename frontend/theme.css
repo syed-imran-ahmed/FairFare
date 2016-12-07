@@ -116,6 +116,17 @@ body {
   margin-left: 485px;  	
 }
 
+div#trip1 {
+	text-align:center;
+	height:auto;
+	width:50%;
+	margin:auto;	
+}
+
+div#trip1 p{
+	display:inline-block;
+	margin:5px;
+}
   
  
 

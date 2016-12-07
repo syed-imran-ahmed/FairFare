@@ -45,8 +45,12 @@
 </div>
 <br>
 <br>
+<div id ="trip1" style="display:none;background-color:#FFE4C4">
+</div>
 
-<div id="map"></div>
+
+<div id="map">
+</div>
 
 <script>
 
@@ -113,6 +117,10 @@ function GetAllScheme1() {
     });
 }
 
+/*<p>Name:  </p>
+<p>Price: </p>
+<p>Duration: </p>
+*/
 function getEstimates()
 {
    
@@ -128,8 +136,13 @@ function getEstimates()
           contentType: 'application/json;charset=utf-8',
         	data : JSON.stringify(obj1),
         	success: function(responseData, textStatus, jqXHR) {
-                console.log(JSON.stringify(responseData));
-		
+			        $('#trip1').show();
+					$('#trip1').html("<p id='name'>"+"Name :"+responseData.name+ "</p>");
+					$('#trip1').append("<p id='cost'>"+"Cost :"+responseData.total_costs_by_cheapest_car_type+"</p>");
+					$('#trip1').append("<p id='duration'>"+"Duration :"+responseData.total_duration+"</p>");
+					$('#trip1').append("<p id='distance'>"+"Distance :"+responseData.total_distance+"</p>");
+					//$('#trip1').has('#name2').text(responseData.total_costs_by_cheapest_car_type);
+						
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(errorThrown);
