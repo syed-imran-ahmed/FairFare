@@ -141,8 +141,8 @@ def callback():
 #Location API's
 @app.route('/locations', methods=['GET'])
 def show_addresses():
-  all_addresses = g.db.execute('select id, nickname, location, latitude, longitude from addresses').fetchall()
-  entries = [dict(id=address[0], nickname=address[1], location=address[2], latitude=address[3], longitude=address[4]) for address in all_addresses]
+  all_addresses = User.query.with_entities(User.id, User.name)
+  entries = [dict(id=address[0], name=address[1]) for address in all_addresses]
   return json.dumps(entries)
 	
 @app.route('/locations', methods=['POST'])
@@ -310,119 +310,28 @@ def demo():
     return render_template('demo.html', token=session.get('access_token'))
 
 
-@app.route('/products', methods=['GET'])
-def products():
-    """Example call to the products endpoint.
-
-    Returns all the products currently available in San Francisco.
-    """
-    url = config.get('base_uber_url') + 'products'
-    params = {
-        'latitude': config.get('start_latitude'),
-        'longitude': config.get('start_longitude'),
-    }
-
-    response = app.requests_session.get(
-        url,
-        headers=generate_ride_headers(session.get('access_token')),
-        params=params,
-    )
-
-    if response.status_code != 200:
-        return 'There was an error', response.status_code
-    return render_template(
-        'results.html',
-        endpoint='products',
-        data=response.text,
-    )
-
-
-@app.route('/time', methods=['GET'])
-def time():
-    """Example call to the time estimates endpoint.
-
-    Returns the time estimates from the given lat/lng given below.
-    """
-    url = config.get('base_uber_url') + 'estimates/time'
-    params = {
-        'start_latitude': config.get('start_latitude'),
-        'start_longitude': config.get('start_longitude'),
-    }
-
-    response = app.requests_session.get(
-        url,
-        headers=generate_ride_headers(UBER_SERVER_TOKEN),
-        params=params,
-    )
-
-    if response.status_code != 200:
-        return 'There was an error', response.status_code
-    return render_template(
-        'results.html',
-        endpoint='time',
-        data=json.dumps(response.text)
-    )
-
-
-@app.route('/price', methods=['GET'])
-def price():
-    """Example call to the price estimates endpoint."""
-
-    """Returns the time estimates from the given lat/lng given below.
-    """
-    url = config.get('base_uber_url') + 'estimates/price'
-    params = {
-        'start_latitude': config.get('start_latitude'),
-        'start_longitude': config.get('start_longitude'),
-        'end_latitude': END_LATITUDE,
-        'end_longitude': END_LONGITUDE,
-    }
-
-    response = requests.get(
-        url,
-        headers=generate_ride_headers(UBER_SERVER_TOKEN),
-        params=params,
-    )
-
-    data = json.loads(response.text)
-    #string = json.dumps(response.text).read().decode('utf-8')
-    #json_obj = json.loads(string)
-    price = data['prices'][1]['estimate']
-    if response.status_code != 200:
-        return 'There was an error', response.status_code
-    return render_template(
-        'results.html',
-        endpoint='price',
-        data=price,
-    )
-
 
 @app.route('/trips', methods=['POST'])
 def trip():
-    name = request.json['name']
-    address = request.json['address']
-    city = request.json['city']
-    state = request.json['state']
-    zip = request.json['zip']
-    params = {
-                'address' : address+city+state,
-                'sensor' : 'false',
-            }  
+    try:
+        id_start=request.json['start']
+        id_end = request.json['end']
+        user1 = User.query.filter_by(id=id_start).first_or_404()
+            #return jsonify({'id':user.id, 'name':user.name, 'address':user.address,'city':user.city,'state':user.state,'zip':user.zip,'email':user.email,'coordinates':{'lat':user.lat,'lng':user.lng}})
+        user2 = User.query.filter_by(id=id_end).first_or_404()
 
-    url = 'http://maps.google.com/maps/api/geocode/json?' + urllib.urlencode(params)
-    response = urllib2.urlopen(url)
-    result = json.load(response)
-    place = result['results'][0]['geometry']['location']
-    END_LATITUDE = place['lat']
-    END_LONGITUDE = place['lng']
+    except IntegrityError:
+        resp = jsonify({"IntegrityError": str(e)})
+        resp.status_code = 404
+        return resp
 
 
     url = config.get('base_uber_url') + 'estimates/price'
     params = {
-        'start_latitude': config.get('start_latitude'),
-        'start_longitude': config.get('start_longitude'),
-        'end_latitude': END_LATITUDE,
-        'end_longitude': END_LONGITUDE,
+        'start_latitude': user1.lat,
+        'start_longitude': user1.lng,
+        'end_latitude': user2.lat,
+        'end_longitude': user2.lng,
     }
 
     response = requests.get(
@@ -443,31 +352,6 @@ def trip():
         data=price,
     )
 
-
-
-
-@app.route('/history', methods=['GET'])
-def history():
-    """Return the last 5 trips made by the logged in user."""
-    url = config.get('base_uber_url_v1_1') + 'history'
-    params = {
-        'offset': 0,
-        'limit': 5,
-    }
-
-    response = app.requests_session.get(
-        url,
-        headers=generate_ride_headers(session.get('access_token')),
-        params=params,
-    )
-
-    if response.status_code != 200:
-        return 'There was an error', response.status_code
-    return render_template(
-        'results.html',
-        endpoint='history',
-        data=response.text,
-    )
 
 
 @app.route('/me', methods=['GET'])
