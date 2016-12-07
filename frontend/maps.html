@@ -25,12 +25,10 @@
      <input type="text" id="name" placeholder="NAME"  />
 	
      <input type="text" id="autocomplete1" placeholder="LOCATION"/>
-	 <select id="autocomplete2" placeholder="SAVED PICKUP LOCATION" >
-        <option value="select">SAVED PICK UP LOCATION</option>
+	 <select id="ddlScheme" onclick="GetAllScheme()" placeholder="SAVED PICKUP LOCATION" >
     </select>
 
-     <select id="autocomplete3" placeholder="SAVED DROP OFF LOCATION" >
-        <option value="select">SAVED DROP OFF LOCATION</option>
+     <select id="ddlScheme" onclick="GetAllScheme()" placeholder="SAVED DROP OFF LOCATION" >
     </select>
 	 
      <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
@@ -44,6 +42,37 @@
 <div id="map"></div>
 
 <script>
+
+function GetAllScheme() {
+    var select = $("#ddlScheme");
+    document.getElementById("ddlScheme").options.length = 0;
+
+    $.ajax({
+
+        type: "GET",
+        url: "http://localhost:7000/locations",
+
+        dataType: "json",
+        success: function (data) {
+            debugger;
+            var datavalue = data;
+            var serverResponse = datavalue;
+            contentType: "application/json";
+            $.each(serverResponse, function (i, item)
+            {
+                select.append("<option value='" + item.id + "'>" + item.name + "</option>")
+
+            });
+
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
+}
+
+
+
 var id = 0;
  function initialize() {
     autocomplete = new google.maps.places.Autocomplete(
