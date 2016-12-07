@@ -331,6 +331,8 @@ def trip():
     try:
         id_start=request.json['start']
         id_end = request.json['end']
+        other_locs = request.json['others']
+        print other_locs
         user1 = User.query.filter_by(id=id_start).first_or_404()
             #return jsonify({'id':user.id, 'name':user.name, 'address':user.address,'city':user.city,'state':user.state,'zip':user.zip,'email':user.email,'coordinates':{'lat':user.lat,'lng':user.lng}})
         user2 = User.query.filter_by(id=id_end).first_or_404()
@@ -339,71 +341,199 @@ def trip():
         resp = jsonify({"IntegrityError": str(e)})
         resp.status_code = 404
         return resp
+    
+    lyftRoutes = []
+    minDist = 0
+    minDistLoc = id_start
+    minRoute = [id_start]
+    minPrice = {}
 
+    # calculate from start to others using lyft
+    for loc in other_locs:
+        userOther = User.query.filter_by(id=loc).first_or_404()
+
+        # lyft fetch prices
+        lyftresponse = lyftclient.get_cost_estimates(user1.lat, user1.lng, userOther.lat, userOther.lng)
+       
+        #minimum cost by lyft
+        lyftcosts = lyftresponse.json.get('cost_estimates')
+        #print lyftcosts
+        lyftbestprice = {}
+        #for item in lyftcosts:
+        # if item["ride_type"] is "lyft":
+        item = lyftcosts[2]
+        surge = item["primetime_percentage"]
+        surge = float("1." + surge[:-1])
+        
+        #item["estimated_cost_cents_min"] = item["estimated_cost_cents_min"] * surge
+        item["estimated_cost_cents_max"] = item["estimated_cost_cents_max"] * surge
+
+        lyftbestprice["name"] = item["display_name"]
+        lyftbestprice['total_costs_by_cheapest_car_type'] = item["estimated_cost_cents_max"] #str(item["estimated_cost_cents_min"]) + " - " + str(item["estimated_cost_cents_max"])
+        lyftbestprice['currency_code'] = item["currency"]
+        lyftbestprice['total_duration'] = item["estimated_duration_seconds"]
+        lyftbestprice['duration_unit'] = "seconds"
+        lyftbestprice['total_distance'] = item["estimated_distance_miles"]
+        lyftbestprice['distance_unit'] = "miles"
+
+        if(minDist > item["estimated_distance_miles"] or minDist is 0):
+            minDist = item["estimated_distance_miles"]
+            minDistLoc = loc
+            minPrice = lyftbestprice
+
+    
+    lyftRoutes.append(minPrice)
+    minRoute.append(minDistLoc)
+    minDist = 0
+    minPrice = {}
+    user1 = User.query.filter_by(id=minDistLoc).first_or_404()
+
+    # Calculate from minDistLocation to all others
+    while(len(minRoute) <= len(other_locs) + 1):
+        minDist = 0
+        minPrice = {}
+        user1 = User.query.filter_by(id=minDistLoc).first_or_404()
+
+        for loc in other_locs:
+            if loc not in minRoute:
+                userOther = User.query.filter_by(id=loc).first_or_404()
+
+                # lyft fetch prices
+                lyftresponse = lyftclient.get_cost_estimates(user1.lat, user1.lng, userOther.lat, userOther.lng)
+  
+                #minimum cost by lyft
+                lyftcosts = lyftresponse.json.get('cost_estimates')
+                #print lyftcosts
+                lyftbestprice = {}
+                #for item in lyftcosts:
+                # if item["ride_type"] is "lyft":
+                item = lyftcosts[2]
+                surge = item["primetime_percentage"]
+                surge = float("1." + surge[:-1])
+                
+                #item["estimated_cost_cents_min"] = item["estimated_cost_cents_min"] * surge
+                item["estimated_cost_cents_max"] = item["estimated_cost_cents_max"] * surge
+
+                lyftbestprice["name"] = item["display_name"]
+                lyftbestprice['total_costs_by_cheapest_car_type'] = item["estimated_cost_cents_max"] #str(item["estimated_cost_cents_min"]) + " - " + str(item["estimated_cost_cents_max"])
+                lyftbestprice['currency_code'] = item["currency"]
+                lyftbestprice['total_duration'] = item["estimated_duration_seconds"]
+                lyftbestprice['duration_unit'] = "seconds"
+                lyftbestprice['total_distance'] = item["estimated_distance_miles"]
+                lyftbestprice['distance_unit'] = "miles"
+
+                if(minDist > item["estimated_distance_miles"] or minDist is 0):
+                    minDist = item["estimated_distance_miles"]
+                    minDistLoc = loc
+                    minPrice = lyftbestprice
+
+        lyftRoutes.append(minPrice)
+        minRoute.append(minDistLoc)
+
+    print minRoute
+
+    minDist = 0
+    minPrice = {}
+    user1 = User.query.filter_by(id=minDistLoc).first_or_404()
     # lyft fetch prices
     lyftresponse = lyftclient.get_cost_estimates(user1.lat, user1.lng, user2.lat, user2.lng)
-    if lyftresponse.status_code != 200:
-        return 'There was an error', response.status_code
-    
-    #minimum cost by lyft
     lyftcosts = lyftresponse.json.get('cost_estimates')
     #print lyftcosts
     lyftbestprice = {}
-    #for item in lyftcosts:
-       # if item["ride_type"] is "lyft":
     item = lyftcosts[2]
     surge = item["primetime_percentage"]
     surge = float("1." + surge[:-1])
-    
-    item["estimated_cost_cents_min"] = item["estimated_cost_cents_min"] * surge
+
     item["estimated_cost_cents_max"] = item["estimated_cost_cents_max"] * surge
 
     lyftbestprice["name"] = item["display_name"]
-    lyftbestprice['total_costs_by_cheapest_car_type'] = str(item["estimated_cost_cents_min"]) + " - " + str(item["estimated_cost_cents_max"])
+    lyftbestprice['total_costs_by_cheapest_car_type'] = item["estimated_cost_cents_max"] #str(item["estimated_cost_cents_min"]) + " - " + str(item["estimated_cost_cents_max"])
     lyftbestprice['currency_code'] = item["currency"]
     lyftbestprice['total_duration'] = item["estimated_duration_seconds"]
     lyftbestprice['duration_unit'] = "seconds"
     lyftbestprice['total_distance'] = item["estimated_distance_miles"]
     lyftbestprice['distance_unit'] = "miles"
 
-    print lyftbestprice
-    
-    # uber data fetched here
+    lyftRoutes.append(lyftbestprice)
+    minRoute.append(id_end)
+
+    uberRoutes = []
     url = config.get('base_uber_url') + 'estimates/price'
-    params = {
-        'start_latitude': user1.lat,
-        'start_longitude': user1.lng,
-        'end_latitude': user2.lat,
-        'end_longitude': user2.lng,
-    }
+    user1 = User.query.filter_by(id=id_start).first_or_404()
 
-    response = requests.get(
-        url,
-        headers=generate_ride_headers(UBER_SERVER_TOKEN),
-        params=params,
-    )
+    for loc in minRoute[1:]:
+        userOther = User.query.filter_by(id=loc).first_or_404()
+       
+        # uber data fetched here
+        params = {
+            'start_latitude': user1.lat,
+            'start_longitude': user1.lng,
+            'end_latitude': userOther.lat,
+            'end_longitude': userOther.lng,
+        }
 
-    if response.status_code != 200:
-        return 'There was an error', response.status_code
+        response = requests.get(
+            url,
+            headers=generate_ride_headers(UBER_SERVER_TOKEN),
+            params=params,
+        )
+        data = json.loads(response.text)
+        # minimum cost by uber
+        surge = float(data['prices'][1]['surge_multiplier'])
+        price = data['prices'][1]['estimate']
+        currency = data['prices'][1]['currency_code']
+        time = data['prices'][1]['duration']
+        distance = data['prices'][1]['distance']
+        index = price.find('-') + 1
+        price = float(price[index:])
+        uberres["name"] = "Uber"
+        uberres['total_costs_by_cheapest_car_type'] = price * surge
+        uberres['currency_code'] = currency
+        uberres['total_duration'] = time
+        uberres['duration_unit'] = "seconds"
+        uberres['total_distance'] = distance
+        uberres['distance_unit'] = "miles"
+        
+        # uberres = {'name':"Uber",'total_costs_by_cheapest_car_type':price, 
+        # 'currency_code':currency,'total_duration':time,'duration_unit':"seconds",
+        # 'total_distance':distance, 'distance_unit':"miles"}
+        uberRoutes.append(uberres)
+        user1 = userOther
 
-    data = json.loads(response.text)
-
-    #string = json.dumps(response.text).read().decode('utf-8')
-    #json_obj = json.loads(string)
-    # minimum cost by uber
-    price = data['prices'][1]['estimate']
-    currency = data['prices'][1]['currency_code']
-    time = data['prices'][1]['duration']
-    distance = data['prices'][1]['distance']
-    uberres = {'name':"Uber",'total_costs_by_cheapest_car_type':price, 
-    'currency_code':currency,'total_duration':time,'duration_unit':"seconds",
-    'total_distance':distance, 'distance_unit':"miles"}
-
+    lyftbestprice = {}
+    lyftbestprice["name"] = lyftRoutes[0]["name"]
+    lyftbestprice['total_costs_by_cheapest_car_type'] = 0
+    lyftbestprice['currency_code'] = lyftRoutes[0]["currency"]
+    lyftbestprice['total_duration'] = 0
+    lyftbestprice['duration_unit'] = "seconds"
+    lyftbestprice['total_distance'] = 0
+    lyftbestprice['distance_unit'] = "miles"
+    for d in lyftRoutes:
+        lyftbestprice['total_costs_by_cheapest_car_type'] += d['total_costs_by_cheapest_car_type']
+        lyftbestprice['total_duration'] += d['total_duration']
+        lyftbestprice['total_distance'] += d['total_distance']
+    
+    uberres = {}
+    uberres["name"] = uberRoutes[0]["name"]
+    uberres['total_costs_by_cheapest_car_type'] = 0
+    uberres['currency_code'] = uberRoutes[0]["currency"]
+    uberres['total_duration'] = 0
+    uberres['duration_unit'] = "seconds"
+    uberres['total_distance'] = 0
+    uberres['distance_unit'] = "miles"
+    for d in uberRoutes:
+        uberres['total_costs_by_cheapest_car_type'] += d['total_costs_by_cheapest_car_type']
+        uberres['total_duration'] += d['total_duration']
+        uberres['total_distance'] += d['total_distance']
+    
+    bestRoute = []
+    for r in minRoute[1:-1]:
+        bestRoute.append('/locations/' + str(r))
+    
     # final response created here
     final_resp ={
         "start": "/locations/" + str(id_start),
-        "best_route_by_costs" : [ 
-        ],
+        "best_route_by_costs" : bestRoute,
         "providers" : [
             lyftbestprice,
             uberres
