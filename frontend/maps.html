@@ -20,9 +20,23 @@
 <br>
 <br>
 <br>
+    
 <div id="addressform">
 <h1>Compare the Best Fare</h1>
 <form id="form1" method="POST" role="form">
+    <!-- Trigger/Open The Modal -->
+
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+  <span class="close">x</span>
+  <p>Data Saved!!</p>
+  </div>
+
+</div>
      <input type="text" id="name" name="Name" placeholder="NAME"  />
 	
      <input type="text" id="autocomplete1" name="LOCATION" placeholder="LOCATION"/>
@@ -225,7 +239,7 @@ function codeAddress() {
           contentType: 'application/json;charset=utf-8',
         	data : JSON.stringify(obj),
         	success: function(responseData, textStatus, jqXHR) {
-                alert("data saved");
+            var btn = document.getElementById("myModal");
 		
             },
             error: function(jqXHR, textStatus, errorThrown) {
