@@ -191,19 +191,24 @@ function getEstimates()
         	data : JSON.stringify(obj1),
         	success: function(responseData, textStatus, jqXHR) {
 			          console.log(responseData);
-			        /*$('#trip1').show();
-					$('#trip1').html("<p id='name'>"+"Name :"+responseData.name+ "</p>");
-					$('#trip1').append("<p id='cost'>"+"Cost :"+responseData.total_costs_by_cheapest_car_type+"</p>");
-					$('#trip1').append("<p id='duration'>"+"Duration :"+responseData.total_duration+"</p>");
-					$('#trip1').append("<p id='distance'>"+"Distance :"+responseData.total_distance+"</p>");
-					//$('#trip1').has('#name2').text(responseData.total_costs_by_cheapest_car_type);*/
+			        $('#trip1').show();
+					$('#trip1').html("<p id='name'>"+"Name :"+responseData.providers[0].name+ "</p>");
+					$('#trip1').append("<p id='cost'>"+"Cost :"+responseData.providers[0].total_costs_by_cheapest_car_type+"</p>");
+					$('#trip1').append("<p id='duration'>"+"Duration :"+responseData.providers[0].total_duration+"</p>");
+					$('#trip1').append("<p id='distance'>"+"Distance :"+responseData.providers[0].total_distance+"</p>");
+					$('#trip1').append("<p id='name1'>"+"Name :"+responseData.providers[1].name+ "</p>");
+					$('#trip1').append("<p id='cost1'>"+"Cost :"+responseData.providers[1].total_costs_by_cheapest_car_type+"</p>");
+					$('#trip1').append("<p id='duration1'>"+"Duration :"+responseData.providers[1].total_duration+"</p>");
+					$('#trip1').append("<p id='distance1'>"+"Distance :"+responseData.providers[1].total_distance+"</p>");
+					
+				
 						
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(errorThrown);
                 alert("data not sent");
             }
-        }); */
+        });
 
 }
 
