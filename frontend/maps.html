@@ -19,7 +19,7 @@
 <br>
 <br>
 
-
+<nav id="navigation" ><a onclick="logout()">Logout</a>  </nav>
    	
 <div id="addressform">
 <h1>Compare the Best Fare</h1>
@@ -40,7 +40,6 @@
 	 
      <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
     <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" onclick="getEstimates()"/>
-
 </form>
 </div>
 <br>
@@ -53,7 +52,17 @@
 </div>
 
 <script>
+var body = document.getElementsByTagName("body")[0];
+var navigation = document.getElementById("navigation");
 
+window.addEventListener("scroll", function(evt) {
+  if (body.scrollTop > navigation.getBoundingClientRect().bottom) {
+    // when the scroll's y is bigger than the nav's y set class to fixednav
+    navigation.className = "fixednav"
+  } else { // Overwise set the class to staticnav
+    navigation.className = "staticnav"
+  }
+});
 
 function GetAllScheme() {
     var select = $("#ddlScheme");
@@ -252,6 +261,9 @@ function codeAddress() {
       }
     });
   }
+function logout() {
+    document.location.href = "https://www.google.com/accounts/Logout";
+}
   </script>
 
   <script async defer
