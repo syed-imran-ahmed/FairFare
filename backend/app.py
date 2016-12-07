@@ -389,7 +389,7 @@ def trip():
     user1 = User.query.filter_by(id=minDistLoc).first_or_404()
 
     # Calculate from minDistLocation to all others
-    while(len(minRoute) <= len(other_locs) + 1):
+    while(len(minRoute) < len(other_locs) + 1):
         minDist = 0
         minPrice = {}
         user1 = User.query.filter_by(id=minDistLoc).first_or_404()
@@ -459,8 +459,9 @@ def trip():
 
     uberRoutes = []
     url = config.get('base_uber_url') + 'estimates/price'
-    user1 = User.query.filter_by(id=id_start).first_or_404()
+    user1 = User.query.filter_by(id=minRoute[0]).first_or_404()
 
+    
     for loc in minRoute[1:]:
         userOther = User.query.filter_by(id=loc).first_or_404()
        
@@ -486,6 +487,7 @@ def trip():
         distance = data['prices'][1]['distance']
         index = price.find('-') + 1
         price = float(price[index:])
+        uberres = {}
         uberres["name"] = "Uber"
         uberres['total_costs_by_cheapest_car_type'] = price * surge
         uberres['currency_code'] = currency
@@ -503,20 +505,22 @@ def trip():
     lyftbestprice = {}
     lyftbestprice["name"] = lyftRoutes[0]["name"]
     lyftbestprice['total_costs_by_cheapest_car_type'] = 0
-    lyftbestprice['currency_code'] = lyftRoutes[0]["currency"]
+    lyftbestprice['currency_code'] = lyftRoutes[0]["currency_code"]
     lyftbestprice['total_duration'] = 0
     lyftbestprice['duration_unit'] = "seconds"
     lyftbestprice['total_distance'] = 0
     lyftbestprice['distance_unit'] = "miles"
+    print lyftRoutes
     for d in lyftRoutes:
         lyftbestprice['total_costs_by_cheapest_car_type'] += d['total_costs_by_cheapest_car_type']
         lyftbestprice['total_duration'] += d['total_duration']
         lyftbestprice['total_distance'] += d['total_distance']
+    lyftbestprice['total_costs_by_cheapest_car_type'] = float(lyftbestprice['total_costs_by_cheapest_car_type'])/100.00
     
     uberres = {}
     uberres["name"] = uberRoutes[0]["name"]
     uberres['total_costs_by_cheapest_car_type'] = 0
-    uberres['currency_code'] = uberRoutes[0]["currency"]
+    uberres['currency_code'] = uberRoutes[0]["currency_code"]
     uberres['total_duration'] = 0
     uberres['duration_unit'] = "seconds"
     uberres['total_distance'] = 0
@@ -527,6 +531,8 @@ def trip():
         uberres['total_distance'] += d['total_distance']
     
     bestRoute = []
+    print "\n"
+    print uberRoutes
     for r in minRoute[1:-1]:
         bestRoute.append('/locations/' + str(r))
     
