@@ -48,7 +48,8 @@
 <br>
 <div id ="trip1" style="display:none;background-color:#FFE4C4">
 </div>
-
+<div id ="trip2" style="display:none;background-color:yellow">
+</div>
 
 <div id="map">
 </div>
@@ -192,14 +193,15 @@ function getEstimates()
         	success: function(responseData, textStatus, jqXHR) {
 			          console.log(responseData);
 			        $('#trip1').show();
+					 $('#trip2').show();
 					$('#trip1').html("<p id='name'>"+"Name :"+responseData.providers[0].name+ "</p>");
 					$('#trip1').append("<p id='cost'>"+"Cost :"+responseData.providers[0].total_costs_by_cheapest_car_type+"</p>");
-					$('#trip1').append("<p id='duration'>"+"Duration :"+responseData.providers[0].total_duration+"</p>");
-					$('#trip1').append("<p id='distance'>"+"Distance :"+responseData.providers[0].total_distance+"</p>");
-					$('#trip1').append("<p id='name1'>"+"Name :"+responseData.providers[1].name+ "</p>");
-					$('#trip1').append("<p id='cost1'>"+"Cost :"+responseData.providers[1].total_costs_by_cheapest_car_type+"</p>");
-					$('#trip1').append("<p id='duration1'>"+"Duration :"+responseData.providers[1].total_duration+"</p>");
-					$('#trip1').append("<p id='distance1'>"+"Distance :"+responseData.providers[1].total_distance+"</p>");
+					$('#trip1').append("<p id='duration'>"+"Duration :"+responseData.providers[0].total_duration+"sec</p>");
+					$('#trip1').append("<p id='distance'>"+"Distance :"+responseData.providers[0].total_distance+"miles</p><br>");
+					$('#trip2').html("<p id='name1'>"+"Name :"+responseData.providers[1].name+ "</p>");
+					$('#trip2').append("<p id='cost1'>"+"Cost :"+responseData.providers[1].total_costs_by_cheapest_car_type+"</p>");
+					$('#trip2').append("<p id='duration1'>"+"Duration :"+responseData.providers[1].total_duration+"sec</p>");
+					$('#trip2').append("<p id='distance1'>"+"Distance :"+responseData.providers[1].total_distance+"miles</p>");
 					
 				
 						

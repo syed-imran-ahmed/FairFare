@@ -97,7 +97,30 @@ body {
   width: 100%;
 }
 
+ h1 {
+  margin: 0;
+  padding: 10px;
+}
+body {
+  margin: 0px;
+  background-color: white;
+}
+p {
+  margin: 10px;
+}
 
+#navigation {
+  background-color: black;
+  padding: 10px;
+  width: 100%;
+  float:right;
+}
+#navigation a {
+  padding: 10px;
+  color: teal;
+  text-align: right;
+  text-decoration: none;
+}
 
  h1 {
     font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -114,6 +137,32 @@ body {
   width: 300px; 
   position:relative;
   margin-left: 485px;  	
+}
+
+div#trip1 {
+	text-align:center;
+	height:auto;
+	width:50%;
+	margin:auto;	
+}
+
+div#trip1 p{
+	display:inline-block;
+	margin:5px;
+	font-size:40px
+}
+  
+ div#trip2 p{
+	display:inline-block;
+	margin:5px;
+	font-size:40px
+	
+}
+div#trip2 {
+	text-align:center;
+	height:auto;
+	width:50%;
+	margin:auto;	
 }
 
 
