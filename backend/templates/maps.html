@@ -37,6 +37,8 @@
 
      <select id="ddlScheme1" onclick="GetAllScheme1()"  placeholder="SAVED DROP OFF LOCATION" >
     </select>
+		<select multiple id ="ddlScheme2" onclick="GetAllScheme2()">
+</select>
 	 
      <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
     <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" onclick="getEstimates()"/>
@@ -52,7 +54,8 @@
 </div>
 
 <script>
-var body = document.getElementsByTagName("body")[0];
+
+/*var body = document.getElementsByTagName("body")[0];
 var navigation = document.getElementById("navigation");
 
 window.addEventListener("scroll", function(evt) {
@@ -62,7 +65,35 @@ window.addEventListener("scroll", function(evt) {
   } else { // Overwise set the class to staticnav
     navigation.className = "staticnav"
   }
-});
+});*/
+function GetAllScheme2() {
+var select = $("#ddlScheme2");
+  $.ajax({
+
+        type: "GET",
+        url: "http://localhost:7000/locations",
+
+        dataType: "json",
+        success: function (data) {
+            //debugger;
+            var datavalue = data;
+            var serverResponse = datavalue;
+            contentType: "application/json";
+			if (select.has('option').length ==0){
+			
+            $.each(serverResponse, function (i, item)
+            {
+                select.append("<option value='" + item.id + "'>" + item.name);
+
+            });
+			}
+
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
+}
 
 function GetAllScheme() {
     var select = $("#ddlScheme");
@@ -75,7 +106,7 @@ function GetAllScheme() {
 
         dataType: "json",
         success: function (data) {
-            debugger;
+            //debugger;
             var datavalue = data;
             var serverResponse = datavalue;
             contentType: "application/json";
@@ -106,7 +137,7 @@ function GetAllScheme1() {
 
         dataType: "json",
         success: function (data) {
-            debugger;
+            //debugger;
             var datavalue = data;
             var serverResponse = datavalue;
             contentType: "application/json";
@@ -135,32 +166,47 @@ function getEstimates()
    
  var start = $('#ddlScheme').val();  
  var end = $('#ddlScheme1').val();
+
+ var flv=document.getElementById('ddlScheme2').options, count=0
+ 
+ var others = [];
+ for (var i = 0; i < flv.length; i++) {
+  if (flv[i].selected) {
+		others[count] =flv[i].value;
+		count++;
+	}
+}
+	                         	
  	  var obj1 = new Object();
    obj1.start = start;
    obj1.end = end;
-   $.ajax({
+  obj1.others = others;
+ 
+ 	
+ $.ajax({
         	url : 'http://localhost:7000/trips',
         	dataType : 'json',
         	type : 'POST',
           contentType: 'application/json;charset=utf-8',
         	data : JSON.stringify(obj1),
         	success: function(responseData, textStatus, jqXHR) {
-			        $('#trip1').show();
+			          console.log(responseData);
+			        /*$('#trip1').show();
 					$('#trip1').html("<p id='name'>"+"Name :"+responseData.name+ "</p>");
 					$('#trip1').append("<p id='cost'>"+"Cost :"+responseData.total_costs_by_cheapest_car_type+"</p>");
 					$('#trip1').append("<p id='duration'>"+"Duration :"+responseData.total_duration+"</p>");
 					$('#trip1').append("<p id='distance'>"+"Distance :"+responseData.total_distance+"</p>");
-					//$('#trip1').has('#name2').text(responseData.total_costs_by_cheapest_car_type);
+					//$('#trip1').has('#name2').text(responseData.total_costs_by_cheapest_car_type);*/
 						
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(errorThrown);
                 alert("data not sent");
             }
-        }); 
+        }); */
 
 }
-var id = 0;
+
   /*  function initMap() {
   var pointA = new google.maps.LatLng(51.7519, -1.2578),
     pointB = new google.maps.LatLng(50.8429, -0.1313),
@@ -261,9 +307,8 @@ function codeAddress() {
       }
     });
   }
-function logout() {
-    document.location.href = "https://www.google.com/accounts/Logout";
-}
+
+
   </script>
 
   <script async defer
