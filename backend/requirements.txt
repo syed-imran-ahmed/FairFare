@@ -5,3 +5,6 @@ Flask-Script
 Flask-Migrate
 simplejson
 lyft_rides
+Flask-Login
+flask_sslify
+flask_oauth

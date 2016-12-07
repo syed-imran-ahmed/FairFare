@@ -22,6 +22,10 @@ from model import app as application
 from sqlalchemy.exc import IntegrityError,SQLAlchemyError
 import os
 
+from lyft_rides.auth import ClientCredentialGrant
+from lyft_rides.session import Session
+from lyft_rides.client import LyftRidesClient
+
 END_LATITUDE=0
 END_LONGITUDE=0
 USER_EMAIL='none'
@@ -36,7 +40,12 @@ with open('config.json') as f:
 app = Flask(__name__)
 app.secret_key = 'iwonttellyou'
 app.requests_session = requests.Session()
- 
+
+lyftauth_flow = ClientCredentialGrant(
+client_id="YAoc10HPt3YZ", client_secret="1I3WOpilktUG3jRUrP_wKyDX0KPkYn1j", scopes='public')
+lyftsession = lyftauth_flow.get_session()
+lyftclient = LyftRidesClient(session)
+
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
                 automatic_options=True):
@@ -331,7 +340,32 @@ def trip():
         resp.status_code = 404
         return resp
 
+    # lyft fetch prices
+    lyftresponse = lyftclient.get_cost_estimates(user1.lat, user1.lng, user2.lat, user2.lng)
+    if lyftresponse.status_code != 200:
+        return 'There was an error', response.status_code
+    
+    #minimum cost by lyft
+    lyftcosts = lyftresponse.json.get('cost_estimates')
+    lyftbestprice = {}
+    for item in lyftcosts:
+        if item["ride_type"] is "lyft":
+            surge = item["primetime_percentage"]
+            surge = float("1." + surge[:-1])
+            
+            item["estimated_cost_cents_min"] = item["estimated_cost_cents_min"] * surge
+            item["estimated_cost_cents_max"] = item["estimated_cost_cents_max"] * surge
 
+            lyftbestprice["name"] = item["display_name"]
+            lyftbestprice['total_costs_by_cheapest_car_type'] = str(item["estimated_cost_cents_min"]) + " - " + str(item["estimated_cost_cents_max"])
+            lyftbestprice['currency_code'] = item["currency"]
+            lyftbestprice['total_duration'] = item["estimated_duration_seconds"]
+            lyftbestprice['duration_unit'] = item["seconds"]
+            lyftbestprice['total_distance'] = item["estimated_distance_miles"]
+            lyftbestprice['distance_unit'] = item["miles"]
+
+    
+    # uber data fetched here
     url = config.get('base_uber_url') + 'estimates/price'
     params = {
         'start_latitude': user1.lat,
@@ -346,27 +380,72 @@ def trip():
         params=params,
     )
 
+    if response.status_code != 200:
+        return 'There was an error', response.status_code
+
     data = json.loads(response.text)
 
     #string = json.dumps(response.text).read().decode('utf-8')
     #json_obj = json.loads(string)
-
+    # minimum cost by uber
     price = data['prices'][1]['estimate']
     currency = data['prices'][1]['currency_code']
     time = data['prices'][1]['duration']
     distance = data['prices'][1]['distance']
-    res = jsonify({'name':"Uber",'total_costs_by_cheapest_car_type':price, 'currency_code':currency,'total_duration':time,'duration_unit':"seconds",'total_distance':distance,
-    'distance_unit':"miles"})
+    uberres = jsonify({'name':"Uber",'total_costs_by_cheapest_car_type':price, 
+    'currency_code':currency,'total_duration':time,'duration_unit':"seconds",
+    'total_distance':distance, 'distance_unit':"miles"})
 
-    if response.status_code != 200:
-        return 'There was an error', response.status_code
+    # final response created here
+    final_resp ={
+        "start": "/locations/" + str(id_start),
+        "best_route_by_costs" : [ 
+        ],
+        "providers" : [
+            lyftresponse,
+            uberres
+            ],
+        "end":"/locations/" + str(id_end)
+        }
+
+    """
+    Sample response:
+    {
+    "id": 200000,
+    "start": "/locations/12345",
+    "best_route_by_costs" : [ 
+        "/locations/1002",
+        "/locations/1000",
+        "/locations/1001",
+    ],
+    "providers" : [
+        {
+            "name" : "Uber",
+            "total_costs_by_cheapest_car_type" : 125,
+            "currency_code": "USD",
+            "total_duration" : 640,
+            "duration_unit": "minute",
+            "total_distance" : 25.05,
+            "distance_unit": "mile"
+        },
+        {
+            "name" : "Lyft",
+            "total_costs_by_cheapest_car_type" : 110,
+            "currency_code": "USD",
+            "total_duration" : 620,
+            "duration_unit": "minute",
+            "total_distance" : 25.05,
+            "distance_unit": "mile"
+        }
+    ],
+    "end": "/locations/12345"
+}"""
     return res
     """render_template(
         'results.html',
         endpoint='price',
         data=res,
     ) """
-
 
 @app.route('/products', methods=['GET'])
 def products():
@@ -473,7 +552,6 @@ def history():
         endpoint='history',
         data=response.text,
     )
-
 
 @app.route('/me', methods=['GET'])
 def me():
