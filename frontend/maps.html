@@ -116,11 +116,11 @@ function GetAllScheme1() {
 function getEstimates()
 {
    
- var select1 = $('#ddlScheme').val();  
- var select2 = $('#ddlScheme1').val();
+ var start = $('#ddlScheme').val();  
+ var end = $('#ddlScheme1').val();
  	  var obj1 = new Object();
-   obj1.id1 = select1;
-   obj1.id2 = select2;
+   obj1.start = start;
+   obj1.end = end;
    $.ajax({
         	url : 'http://localhost:7000/trips',
         	dataType : 'json',
@@ -128,7 +128,7 @@ function getEstimates()
           contentType: 'application/json;charset=utf-8',
         	data : JSON.stringify(obj1),
         	success: function(responseData, textStatus, jqXHR) {
-                alert(""data Sent");
+                console.log(JSON.stringify(responseData));
 		
             },
             error: function(jqXHR, textStatus, errorThrown) {
