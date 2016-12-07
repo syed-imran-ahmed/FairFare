@@ -1,38 +1,45 @@
 <!DOCTYPE html>
-<html ng-app="Test">
+<html>
 <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" href="/js/bootstrap.min.css">
+	<link rel="stylesheet" href="js/bootstrap.min.css">
     <link rel="stylesheet" type="text/css"href="theme.css">
     
-    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
+    <!--script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script-->
+    <!--script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script-->
  
   
 </head>
 
 <body>
 
+
 <br>
 <h1>Welcome to Fair Fare!</h1>
 <br>
 <br>
 
+
    	
-<div id="addressform" ng-controller="TestCtrl">
+<div id="addressform">
 <h1>Compare the Best Fare</h1>
 <form id="form1" method="POST" role="form">
      <input type="text" id="name" placeholder="NAME"  />
 	
      <input type="text" id="autocomplete1" placeholder="LOCATION"/>
-	 <select id="ddlScheme" onclick="GetAllScheme()" placeholder="SAVED PICKUP LOCATION" >
+	 <select id="ddlScheme" onclick="GetAllScheme()"  placeholder="SAVED PICKUP LOCATION" >
     </select>
+	
+	<!--select onchange="console.log('Hello')">
+	<option id="first">First
+	<option id="sec">Second
+	</select-->
 
-     <select id="ddlScheme" onclick="GetAllScheme()" placeholder="SAVED DROP OFF LOCATION" >
+     <select id="ddlScheme1" onclick="GetAllScheme1()"  placeholder="SAVED DROP OFF LOCATION" >
     </select>
 	 
      <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
-    <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" />
+    <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" onclick="getEstimates()"/>
 
 </form>
 </div>
@@ -43,9 +50,10 @@
 
 <script>
 
+
 function GetAllScheme() {
     var select = $("#ddlScheme");
-    document.getElementById("ddlScheme").options.length = 0;
+   
 
     $.ajax({
 
@@ -58,11 +66,14 @@ function GetAllScheme() {
             var datavalue = data;
             var serverResponse = datavalue;
             contentType: "application/json";
+			if (select.has('option').length ==0){
+			
             $.each(serverResponse, function (i, item)
             {
-                select.append("<option value='" + item.id + "'>" + item.name + "</option>")
+                select.append("<option value='" + item.id + "'>" + item.name);
 
             });
+			}
 
         },
         error: function (xhr) {
@@ -71,8 +82,62 @@ function GetAllScheme() {
     });
 }
 
+function GetAllScheme1() {
+    var select = $("#ddlScheme1");
+    
 
+    $.ajax({
 
+        type: "GET",
+        url: "http://localhost:7000/locations",
+
+        dataType: "json",
+        success: function (data) {
+            debugger;
+            var datavalue = data;
+            var serverResponse = datavalue;
+            contentType: "application/json";
+			if (select.has('option').length ==0){
+            $.each(serverResponse, function (i, item)
+            {
+			
+                select.append("<option value='" + item.id + "'>" + item.name + "</option>")
+
+            });
+			}
+			
+        },
+        error: function (xhr) {
+            alert(xhr.responseText);
+        }
+    });
+}
+
+function getEstimates()
+{
+   
+ var select1 = $('#ddlScheme').val();  
+ var select2 = $('#ddlScheme1').val();
+ 	  var obj1 = new Object();
+   obj1.id1 = select1;
+   obj1.id2 = select2;
+   $.ajax({
+        	url : 'http://localhost:7000/trips',
+        	dataType : 'json',
+        	type : 'POST',
+          contentType: 'application/json;charset=utf-8',
+        	data : JSON.stringify(obj1),
+        	success: function(responseData, textStatus, jqXHR) {
+                alert(""data Sent");
+		
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                alert("data not sent");
+            }
+        }); 
+
+}
 var id = 0;
  function initialize() {
     autocomplete = new google.maps.places.Autocomplete(
@@ -109,38 +174,14 @@ function codeAddress() {
         	data : JSON.stringify(obj),
         	success: function(responseData, textStatus, jqXHR) {
                 alert("data saved");
-			    id = responseData.id;
-				$.getJSON("http://localhost:7000/locations", function (data) {
-				var datavalue = data;
-            var serverResponse = datavalue;
-			
-    $.each(serverResponse, function (i, item) {
-        var div_data = "<option value=" + item.id + ">" + item.address + "</option>";
-        alert(div_data);
-        $(div_data).appendTo('#autocomplete2');
-		$(div_data).appendTo('#autocomplete3');
-
-    });
-});
+		
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(errorThrown);
                 alert("not saved");
             }
         }); 
-		/*$.ajax({
-        	url : 'http://localhost:7000/locations/'+id,
-        	dataType : 'json',
-        	type : 'GET',
-        	success: function(responseData) {
-			var result = responseData.address + responseData.city + responseData.state
-                $("#autocomplete2").html(result)}
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.log(errorThrown);
-                alert("not saved");
-            }
-        }); */
+	
 		
  map.setCenter(results[0].geometry.location);
         var marker = new google.maps.Marker({
@@ -160,7 +201,7 @@ function codeAddress() {
   <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoKeFrswJ6Btx3tQLF6eN-wE3Iej0WF3Q&libraries=places&callback=initialize">
     </script>
-	<script src="/js/jquery-2.1.1.min.js"></script>
+	<script src="js/jquery-2.1.1.min.js"></script>
 	
 </body>
 </html>
