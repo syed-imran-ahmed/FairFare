@@ -503,11 +503,11 @@ def trip():
 
     lyftbestprice = {}
     lyftbestprice["name"] = lyftRoutes[0]["name"]
-    lyftbestprice['total_costs_by_cheapest_car_type'] = 0
+    lyftbestprice['total_costs_by_cheapest_car_type'] = 0.0
     lyftbestprice['currency_code'] = lyftRoutes[0]["currency_code"]
-    lyftbestprice['total_duration'] = 0
+    lyftbestprice['total_duration'] = 0.0
     lyftbestprice['duration_unit'] = "seconds"
-    lyftbestprice['total_distance'] = 0
+    lyftbestprice['total_distance'] = 0.0
     lyftbestprice['distance_unit'] = "miles"
     print lyftRoutes
     for d in lyftRoutes:
@@ -518,11 +518,11 @@ def trip():
     
     uberres = {}
     uberres["name"] = uberRoutes[0]["name"]
-    uberres['total_costs_by_cheapest_car_type'] = 0
+    uberres['total_costs_by_cheapest_car_type'] = 0.0
     uberres['currency_code'] = uberRoutes[0]["currency_code"]
-    uberres['total_duration'] = 0
+    uberres['total_duration'] = 0.0
     uberres['duration_unit'] = "seconds"
-    uberres['total_distance'] = 0
+    uberres['total_distance'] = 0.0
     uberres['distance_unit'] = "miles"
     for d in uberRoutes:
         uberres['total_costs_by_cheapest_car_type'] += d['total_costs_by_cheapest_car_type']
