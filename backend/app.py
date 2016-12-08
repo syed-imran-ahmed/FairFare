@@ -205,8 +205,8 @@ def create_address():
 @app.route('/locations/<address_id>')
 @crossdomain(origin='*')
 def show_address(address_id):
-    if 'email' not in session:
-        return 'Please <a href="/login">login</a>'
+    if session.get('email') is None:
+        return redirect(url_for('index'))
     else:
         try:
             user = User.query.filter_by(id=address_id).first_or_404()

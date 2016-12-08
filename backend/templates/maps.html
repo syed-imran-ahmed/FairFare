@@ -168,6 +168,58 @@ function getEstimates()
  var start = $('#ddlScheme').val();  
  var end = $('#ddlScheme1').val();
 
+var start_lat;
+var start_lng;
+
+var end_lat;
+var end_lng;
+
+ $.ajax({
+
+        	url : 'http://localhost:7000/locations/'+start,
+        	dataType : 'json',
+        	type : 'GET',
+          contentType: 'application/json;charset=utf-8',
+        	data : JSON.stringify(obj1),
+        	success: function(responseData, textStatus, jqXHR) {
+                debugger;
+			          console.log(responseData);
+                      start_lat=responseData.coordinates.lat	;
+                      start_lng = responseData.coordinates.lng;		
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                alert("data not sent");
+            }
+        });
+
+
+$.ajax({
+
+        	url : 'http://localhost:7000/locations/'+end,
+        	dataType : 'json',
+        	type : 'GET',
+          contentType: 'application/json;charset=utf-8',
+        	data : JSON.stringify(obj1),
+        	success: function(responseData, textStatus, jqXHR) {
+                debugger;
+			          console.log(responseData);
+                      end_lat=responseData.coordinates.lat	;
+                      end_lng = responseData.coordinates.lng;		
+
+                      initMap(start_lat,start_lng,end_lat,end_lng);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                alert("data not sent");
+            }
+        });
+
+
+
+
+
+
  var flv=document.getElementById('ddlScheme2').options, count=0
  
  var others = [];
@@ -191,9 +243,10 @@ function getEstimates()
           contentType: 'application/json;charset=utf-8',
         	data : JSON.stringify(obj1),
         	success: function(responseData, textStatus, jqXHR) {
+                    debugger;
 			          console.log(responseData);
 			        $('#trip1').show();
-					 $('#trip2').show();
+					$('#trip2').show();
 					$('#trip1').html("<p id='name'>"+"Name :"+responseData.providers[0].name+ "</p>");
 					$('#trip1').append("<p id='cost'>"+"Cost :"+responseData.providers[0].total_costs_by_cheapest_car_type+"</p>");
 					$('#trip1').append("<p id='duration'>"+"Duration :"+responseData.providers[0].total_duration+"sec</p>");
@@ -212,16 +265,19 @@ function getEstimates()
             }
         });
 
+        
+
 }
 
-  /*  function initMap() {
-  var pointA = new google.maps.LatLng(51.7519, -1.2578),
-    pointB = new google.maps.LatLng(50.8429, -0.1313),
+  function initMap(start_lat,start_lng,end_lat,end_lng) {
+      debugger;
+  var pointA = new google.maps.LatLng(start_lat, start_lng),
+    pointB = new google.maps.LatLng(end_lat, end_lng),
     myOptions = {
       zoom: 7,
       center: pointA
     },
-    map = new google.maps.Map(document.getElementById('map-canvas'), myOptions),
+    map = new google.maps.Map(document.getElementById('map'), myOptions),
     // Instantiate a directions service.
     directionsService = new google.maps.DirectionsService,
     directionsDisplay = new google.maps.DirectionsRenderer({
@@ -256,7 +312,7 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, 
       window.alert('Directions request failed due to ' + status);
     }
   });
-}*/
+}
  function initialize() {
     autocomplete = new google.maps.places.Autocomplete(
             /** @type {!HTMLInputElement} */(document.getElementById('autocomplete1')),
