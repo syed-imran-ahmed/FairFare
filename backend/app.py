@@ -219,8 +219,8 @@ def show_address(address_id):
 @app.route('/locations/<int:address_id>', methods=['PUT'])
 @crossdomain(origin='*')
 def edit_address(address_id):
-    if 'email' not in session:
-        return 'Please <a href="/login">login</a>'
+    if session.get('email') is None:
+        return redirect(url_for('index'))
     else:
         try:
             user = User.query.get(address_id)
@@ -240,8 +240,8 @@ def edit_address(address_id):
 @app.route('/locations/<int:address_id>', methods=['DELETE'])
 @crossdomain(origin='*')
 def delete_address(address_id):
-    if 'email' not in session:
-        return 'Please <a href="/login">login</a>'
+    if session.get('email') is None:
+        return redirect(url_for('index'))
     else:
         try:
             db.session.delete(User.query.get(address_id))

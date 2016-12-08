@@ -29,7 +29,8 @@
      <input type="text" id="name" placeholder="NAME"  />
 	
      <input type="text" id="autocomplete1" placeholder="LOCATION"/>
-	 <select id="ddlScheme" onclick="GetAllScheme()"  placeholder="SAVED PICKUP LOCATION" >
+	 <select id="ddlScheme" onclick="GetAllScheme()" >
+         
     </select>
 	
 	<!--select onchange="console.log('Hello')">
@@ -43,6 +44,7 @@
 </select>
 	 
      <input id="submit" type="button" name="Save" value="Save" onclick="codeAddress()"/>
+     <input id="submit" type="button" name="Delete" value="Delete" onclick="deleteData()">
     <input id="submit"type="button" name="Get Fare Estimates" value="Get Fare Estimates" onclick="getEstimates()"/>
 </form>
 </div>
@@ -164,6 +166,27 @@ function GetAllScheme1() {
 <p>Price: </p>
 <p>Duration: </p>
 */
+function deleteData()
+{
+    var start = $('#ddlScheme').val(); 
+    $.ajax({
+
+        	url : 'http://localhost:7000/locations/'+start,
+        	type : 'DELETE',
+            contentType: 'application/json;charset=utf-8',
+        	success: function(responseData, textStatus, jqXHR) {
+                debugger;
+			          console.log("Data Deleted");
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                alert("data not deleted");
+            }
+        });
+
+}
+
+
 function getEstimates()
 {
    
