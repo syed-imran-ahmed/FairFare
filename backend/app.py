@@ -88,7 +88,7 @@ def crossdomain(origin=None, methods=None, headers=None,
     return decorator
  
 #GOOGLE AUTHENTICATION CALLS###########################################################
-redirect_uri = 'http://localhost:7000/gCallback'
+redirect_uri = 'http://ec2-35-161-149-35.us-west-2.compute.amazonaws.com:7000/gCallback'
 client_id = '786919166452-v1h1kp81u4h1bsrhf1fp9eibt8ree1of.apps.googleusercontent.com'  # get from https://code.google.com/apis/console
 client_secret = '_Cbad7k6yXdmSnSDF9NHPt1f'
 
