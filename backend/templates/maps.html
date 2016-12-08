@@ -3,11 +3,11 @@
 <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<link rel="stylesheet" href="/static/js/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css"href="/static/css/theme.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css">
     
     <!--script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script-->
     <!--script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script-->
- 
+  
   
 </head>
 
@@ -15,12 +15,14 @@
 
 
 <br>
-<h1>Welcome to Fair Fare!</h1>
+<h1>Welcome to Fair Fare</h1>
 <br>
 
 
 <nav id="navigation" ><a onclick="logout()">Logout</a>  </nav>
-   	
+<br>
+<br>
+<br>   	
 <div id="addressform">
 <h1>Compare the Best Fare</h1>
 <form id="form1" method="POST" role="form">
@@ -369,8 +371,14 @@ function codeAddress() {
         alert('Geocode was not successful for the following reason: ' + status);
       }
     });
+        document.getElementById("name").value = "";
+    document.getElementById("autocomplete1").value = "";
+
   }
 
+function logout() {
+    document.location.href = "http://localhost:7000/logout";
+}
 
   </script>
 
