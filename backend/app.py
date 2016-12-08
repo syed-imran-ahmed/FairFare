@@ -515,7 +515,11 @@ def trip():
         lyftbestprice['total_duration'] += d['total_duration']
         lyftbestprice['total_distance'] += d['total_distance']
     lyftbestprice['total_costs_by_cheapest_car_type'] = float(lyftbestprice['total_costs_by_cheapest_car_type'])/100.00
-    
+    lyftbestprice['total_costs_by_cheapest_car_type'] = str(lyftbestprice['total_costs_by_cheapest_car_type'])
+    index = lyftbestprice['total_costs_by_cheapest_car_type'].find('.')
+    if(index > 0):
+        lyftbestprice['total_costs_by_cheapest_car_type'] = lyftbestprice['total_costs_by_cheapest_car_type'][:index + 2]
+
     uberres = {}
     uberres["name"] = uberRoutes[0]["name"]
     uberres['total_costs_by_cheapest_car_type'] = 0.0
